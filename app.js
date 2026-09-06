@@ -168,13 +168,14 @@
       ' containing all terms: <strong>"' + escapeHtml(query) + '"</strong></span>';
 
     resultsContainer.innerHTML = results.map(function(item, idx) {
+      var displayTags = phraseRelevantTags(item.phrase, item.tags, query);
       return '<article class="result-card" style="animation-delay:' + (idx * 20) + 'ms">' +
         '<header class="result-header">' +
           '<span class="result-guideline"><a href="https://lms.ehc.gov.eg/lms/mod/book/view.php?id=' + item.guidelineBookId + '" target="_blank" rel="noopener">' + escapeHtml(item.guidelineTitle) + '</a></span>' +
         '</header>' +
         '<p class="result-phrase">' + highlightText(item.phrase, query) + '</p>' +
         '<div class="result-tags">' +
-          item.tags.map(function(t) { return '<button type="button" class="result-tag" data-search-tag="' + escapeHtml(t) + '">' + escapeHtml(t) + '</button>'; }).join('') +
+          displayTags.map(function(t) { return '<button type="button" class="result-tag" data-search-tag="' + escapeHtml(t) + '">' + escapeHtml(t) + '</button>'; }).join('') +
         '</div>' +
       '</article>';
     }).join('');
@@ -200,7 +201,6 @@
 
     var pattern;
     if (words.length > 1) {
-      // Highlight the full contiguous phrase if present, plus each individual word
       pattern = escapeRegex(query.trim()) + '|' + words.join('|');
     } else {
       pattern = words[0];
@@ -208,6 +208,77 @@
 
     var regex = new RegExp('(' + pattern + ')', 'gi');
     return escaped.replace(regex, '<mark>$1</mark>');
+  }
+
+  function phraseRelevantTags(phraseText, guidelineTags, searchQuery) {
+    var phraseLower = phraseText.toLowerCase();
+    var queryLower = (searchQuery || '').toLowerCase();
+    var output = [];
+    var seen = {};
+
+    // 1. Always include the searched tag first (prefer exact match)
+    if (queryLower) {
+      var queryCandidates = [];
+      allTags.forEach(function(t) {
+        var tl = t.toLowerCase();
+        if (tl === queryLower) { queryCandidates.push({ tag: t, pref: 0 }); }
+        else if (tl.indexOf(queryLower) !== -1) { queryCandidates.push({ tag: t, pref: 1 }); }
+        else if (queryLower.indexOf(tl) !== -1 && tl.length >= 3) { queryCandidates.push({ tag: t, pref: 2 }); }
+      });
+      queryCandidates.sort(function(a, b) { return a.pref - b.pref; });
+      var tagToAdd = queryCandidates.length ? queryCandidates[0].tag : searchQuery;
+      output.push(tagToAdd);
+      seen[(tagToAdd.toLowerCase().replace(/ae/g, 'e'))] = true;
+    }
+
+    // 2. Score every allTag by phrase relevance (word-boundary aware)
+    var scored = [];
+    allTags.forEach(function(tag) {
+      var key = tag.toLowerCase();
+      // Dedupe British/American spelling variants (caesarean == cesarean)
+      var normKey = key.replace(/ae/g, 'e');
+      if (seen[normKey]) return;
+      var tagWords = key.split(/\s+/).filter(Boolean);
+
+      // Skip tags whose words are all 1-2 chars (B, C, etc.) as they match everywhere
+      var meaningful = tagWords.filter(function(w) { return w.length >= 3; });
+      if (meaningful.length === 0) return;
+
+      var matches = meaningful.filter(function(w) {
+        if (w.length >= 6) return phraseLower.indexOf(w) !== -1;
+        // Short words + abbreviations must match as a whole word (avoid "art" inside "partum")
+        return new RegExp('(^|[^A-Za-z])' + w + '($|[^A-Za-z])').test(phraseLower);
+      }).length;
+
+      // Require ALL meaningful words to appear (consistent with search semantics)
+      if (matches === meaningful.length) {
+        var inGuideline = guidelineTags.some(function(gt) {
+          return gt.toLowerCase() === key;
+        });
+        scored.push({
+          tag: tag,
+          score: meaningful.length + (inGuideline ? 0.5 : 0) + (meaningful.length > 1 ? 0.2 : 0)
+        });
+      }
+    });
+
+    // 3. Sort by relevance score descending
+    scored.sort(function(a, b) {
+      return b.score - a.score || a.tag.localeCompare(b.tag);
+    });
+
+    // 4. Take top 5 scored + the query tag = 6 total, dedup
+    scored.forEach(function(s) {
+      if (output.length < 6) {
+        var key = s.tag.toLowerCase().replace(/ae/g, 'e');
+        if (!seen[key]) {
+          output.push(s.tag);
+          seen[key] = true;
+        }
+      }
+    });
+
+    return output;
   }
 
   function showInitialState() {
