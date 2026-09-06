@@ -83,7 +83,7 @@
 
   function updateHintTags() {
     if (!hintTagsEl) return;
-    var sample = ['preeclampsia', 'oxytocin', 'methotrexate', 'advoca', 'episiotomy', 'Robson Classification'];
+    var sample = ['preeclampsia', 'oxytocin', 'methotrexate', 'episiotomy', 'Robson Classification'];
     var hint = sample.join(', ');
     hintTagsEl.textContent = hint;
   }
@@ -122,7 +122,7 @@
 
   function performSearch() {
     var query = (currentSearch || '').trim().toLowerCase();
-    var showInitial = !query && !selectedTag;
+    var showInitial = !query;
 
     if (showInitial) {
       showInitialState();
@@ -131,46 +131,39 @@
 
     hideInitialState();
 
-    var results = allPhrases;
+    var words = query.split(/\s+/).filter(Boolean);
+    // Deduplicate word forms so "oxytocin oxytocin" doesn't force double matches
+    var uniqueWords = [];
+    words.forEach(function(w) {
+      var wl = w.toLowerCase();
+      if (uniqueWords.indexOf(wl) === -1) uniqueWords.push(wl);
+    });
 
-    if (selectedTag) {
-      // Tag card clicked: return phrases that are tagged with it (or contain the tag text)
-      var tagLower = selectedTag.toLowerCase();
-      results = allPhrases.filter(function(item) {
-        return item.tags.some(function(t) { return t.toLowerCase() === tagLower; }) ||
-               item.phrase.toLowerCase().indexOf(tagLower) !== -1;
+    var results = allPhrases.filter(function(item) {
+      var text = item.phrase.toLowerCase();
+      return uniqueWords.every(function(w) {
+        return text.indexOf(w) !== -1;
       });
-    }
+    });
 
-    if (query && !(selectedTag && query === selectedTag.toLowerCase())) {
-      // User typed extra / different text on top of a tag, or typed free text
-      results = results.filter(function(item) {
-        return item.phrase.toLowerCase().indexOf(query) !== -1;
-      });
-    }
-
-    renderResults(results, query, selectedTag);
+    renderResults(results, query, uniqueWords);
   }
 
-  function renderResults(results, query, activeTag) {
+  function renderResults(results, query, words) {
     if (results.length === 0) {
       resultsContainer.innerHTML = '';
       resultsStats.hidden = true;
       noResults.hidden = false;
-      searchTermDisplay.textContent = query || activeTag || '';
+      searchTermDisplay.textContent = query;
       return;
     }
 
     noResults.hidden = true;
 
     resultsStats.hidden = false;
-    var label = (activeTag ? 'Tag "' + escapeHtml(activeTag) + '"' : '');
-    if (query && !(activeTag && query === activeTag.toLowerCase())) {
-      label += (label ? ' · ' : '') + 'keyword "' + escapeHtml(query) + '"';
-    }
     resultsStats.innerHTML =
       '<span>Showing ' + results.length + (results.length === 1 ? ' phrase' : ' phrases') +
-      (label ? ' for ' + label : '') + '</span>';
+      ' containing all terms: <strong>"' + escapeHtml(query) + '"</strong></span>';
 
     resultsContainer.innerHTML = results.map(function(item, idx) {
       return '<article class="result-card" style="animation-delay:' + (idx * 20) + 'ms">' +
@@ -194,7 +187,7 @@
 
     var pattern;
     if (words.length > 1) {
-      // Highlight the full phrase if present, and each individual word otherwise
+      // Highlight the full contiguous phrase if present, plus each individual word
       pattern = escapeRegex(query.trim()) + '|' + words.join('|');
     } else {
       pattern = words[0];
