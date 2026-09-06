@@ -1,87 +1,106 @@
 (function() {
   'use strict';
 
-  let guidelinesData = null;
-  let allPhrases = [];
-  let allTags = [];
-  let currentSearch = '';
-  let selectedTag = null;
+  var guidelinesData = null;
+  var allPhrases = [];
+  var allTags = [];
+  var currentSearch = '';
+  var selectedTag = null;
 
-  const searchInput = document.getElementById('search-input');
-  const clearBtn = document.getElementById('clear-search');
-  const tagsContainer = document.getElementById('tags-container');
-  const resultsContainer = document.getElementById('results-container');
-  const resultsStats = document.getElementById('results-stats');
-  const noResults = document.getElementById('no-results');
-  const searchTermDisplay = document.getElementById('search-term-display');
-  const initialState = document.getElementById('initial-state');
-  const hintTagsEl = document.querySelector('.hint-tags');
+  var searchInput = document.getElementById('search-input');
+  var clearBtn = document.getElementById('clear-search');
+  var tagsContainer = document.getElementById('tags-container');
+  var resultsContainer = document.getElementById('results-container');
+  var resultsStats = document.getElementById('results-stats');
+  var noResults = document.getElementById('no-results');
+  var searchTermDisplay = document.getElementById('search-term-display');
+  var initialState = document.getElementById('initial-state');
+  var hintTagsEl = document.querySelector('.hint-tags');
 
-  async function loadGuidelines() {
-    try {
-      const res = await fetch('guidelines.json', { cache: 'no-store' });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      guidelinesData = await res.json();
-      processData();
-      renderTags();
-      updateHintTags();
-    } catch (err) {
-      console.error('Failed to load guidelines:', err);
-      resultsContainer.innerHTML = `<div class="no-results" style="text-align:center;padding:2rem;color:var(--color-text-muted)"><p>Failed to load guidelines data. Please refresh or <a href="https://lms.ehc.gov.eg/lms/course/view.php?id=38" target="_blank" rel="noopener">view on EHC LMS</a>.</p></div>`;
-    }
+  function loadGuidelines() {
+    fetch('guidelines.json', { cache: 'no-store' })
+      .then(function(res) {
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return res.json();
+      })
+      .then(function(data) {
+        guidelinesData = data;
+        processData();
+        renderTags();
+        updateHintTags();
+      })
+      .catch(function(err) {
+        console.error('Failed to load guidelines:', err);
+        resultsContainer.innerHTML =
+          '<div class="no-results" style="text-align:center;padding:2rem;color:var(--color-text-muted)">' +
+          '<p>Failed to load guidelines data. Please refresh or <a href="https://lms.ehc.gov.eg/lms/course/view.php?id=38" target="_blank" rel="noopener">view on EHC LMS</a>.</p></div>';
+      });
   }
 
   function processData() {
     allPhrases = [];
-    allTags = new Set();
 
-    guidelinesData.guidelines.forEach(g => {
-      g.phrases.forEach((phrase, idx) => {
+    guidelinesData.guidelines.forEach(function(g) {
+      g.phrases.forEach(function(phrase, idx) {
         allPhrases.push({
-          id: `${g.id}-${idx}`,
+          id: g.id + '-' + idx,
           guidelineId: g.id,
           guidelineTitle: g.title,
           guidelineBookId: g.bookId,
           phrase: phrase,
           tags: g.tags
         });
-        g.tags.forEach(t => allTags.add(t));
       });
     });
 
-    allTags = Array.from(allTags).sort((a, b) => a.localeCompare(b));
+    // Use the curated allTags list from the JSON if present, else derive from guideline tags
+    if (guidelinesData.allTags && guidelinesData.allTags.length) {
+      allTags = guidelinesData.allTags.slice();
+    } else {
+      var tagSet = {};
+      allPhrases.forEach(function(item) {
+        item.tags.forEach(function(t) { tagSet[t] = true; });
+      });
+      allTags = Object.keys(tagSet);
+    }
+
+    allTags = allTags.sort(function(a, b) { return a.localeCompare(b); });
   }
 
   function renderTags() {
-    tagsContainer.innerHTML = allTags.map(tag => `
-      <button
-        type="button"
-        class="tag-btn"
-        data-tag="${escapeHtml(tag)}"
-        role="option"
-        aria-selected="false"
-        tabindex="0"
-      >${escapeHtml(tag)}</button>
-    `).join('');
+    tagsContainer.innerHTML = allTags.map(function(tag) {
+      return '<button type="button" class="tag-btn" data-tag="' + escapeHtml(tag) +
+        '" role="option" aria-selected="false" tabindex="0">' + escapeHtml(tag) + '</button>';
+    }).join('');
 
-    tagsContainer.querySelectorAll('.tag-btn').forEach(btn => {
-      btn.addEventListener('click', () => handleTagClick(btn));
-      btn.addEventListener('keydown', e => {
+    Array.prototype.forEach.call(tagsContainer.querySelectorAll('.tag-btn'), function(btn) {
+      btn.addEventListener('click', function() { handleTagClick(btn); });
+      btn.addEventListener('keydown', function(e) {
         if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleTagClick(btn); }
       });
     });
   }
 
   function updateHintTags() {
-    const sampleTags = allTags.slice(0, 8).join(', ');
-    if (hintTagsEl) hintTagsEl.textContent = sampleTags;
+    if (!hintTagsEl) return;
+    var sample = ['preeclampsia', 'oxytocin', 'methotrexate', 'advoca', 'episiotomy', 'Robson Classification'];
+    var hint = sample.join(', ');
+    hintTagsEl.textContent = hint;
+  }
+
+  function clearTagSelection() {
+    selectedTag = null;
+    Array.prototype.forEach.call(tagsContainer.querySelectorAll('.tag-btn'), function(b) {
+      b.classList.remove('selected');
+      b.setAttribute('aria-selected', 'false');
+    });
   }
 
   function handleTagClick(btn) {
-    const tag = btn.dataset.tag;
-    const isSelected = btn.classList.contains('selected');
+    var tag = btn.dataset.tag;
+    var isSelected = btn.classList.contains('selected');
 
-    tagsContainer.querySelectorAll('.tag-btn').forEach(b => {
+    Array.prototype.forEach.call(tagsContainer.querySelectorAll('.tag-btn'), function(b) {
       b.classList.remove('selected');
       b.setAttribute('aria-selected', 'false');
     });
@@ -99,12 +118,11 @@
     }
 
     performSearch();
-    searchInput.focus();
   }
 
   function performSearch() {
-    const query = currentSearch.trim().toLowerCase();
-    const showInitial = !query && !selectedTag;
+    var query = (currentSearch || '').trim().toLowerCase();
+    var showInitial = !query && !selectedTag;
 
     if (showInitial) {
       showInitialState();
@@ -113,58 +131,65 @@
 
     hideInitialState();
 
-    let results = allPhrases;
+    var results = allPhrases;
 
-    if (query) {
-      results = results.filter(item => item.phrase.toLowerCase().includes(query));
+    if (selectedTag) {
+      // Tag card clicked: return phrases that are tagged with it (or contain the tag text)
+      var tagLower = selectedTag.toLowerCase();
+      results = allPhrases.filter(function(item) {
+        return item.tags.some(function(t) { return t.toLowerCase() === tagLower; }) ||
+               item.phrase.toLowerCase().indexOf(tagLower) !== -1;
+      });
     }
 
-    if (selectedTag && !query.includes(selectedTag.toLowerCase())) {
-      results = results.filter(item => item.tags.some(t => t.toLowerCase() === selectedTag.toLowerCase()));
+    if (query && !(selectedTag && query === selectedTag.toLowerCase())) {
+      // User typed extra / different text on top of a tag, or typed free text
+      results = results.filter(function(item) {
+        return item.phrase.toLowerCase().indexOf(query) !== -1;
+      });
     }
 
-    renderResults(results, query);
+    renderResults(results, query, selectedTag);
   }
 
-  function renderResults(results, query) {
+  function renderResults(results, query, activeTag) {
     if (results.length === 0) {
       resultsContainer.innerHTML = '';
       resultsStats.hidden = true;
       noResults.hidden = false;
-      searchTermDisplay.textContent = query || selectedTag || '';
+      searchTermDisplay.textContent = query || activeTag || '';
       return;
     }
 
     noResults.hidden = true;
 
     resultsStats.hidden = false;
-    resultsStats.innerHTML = `
-      <span aria-hidden="true">📋</span>
-      <span>${results.length} phrase${results.length !== 1 ? 's' : ''} found</span>
-      ${query ? `<span>for "${escapeHtml(query)}"</span>` : ''}
-      ${selectedTag && !query.includes(selectedTag.toLowerCase()) ? `<span>+ tag: ${escapeHtml(selectedTag)}</span>` : ''}
-    `;
+    var label = (activeTag ? 'Tag "' + escapeHtml(activeTag) + '"' : '');
+    if (query && !(activeTag && query === activeTag.toLowerCase())) {
+      label += (label ? ' · ' : '') + 'keyword "' + escapeHtml(query) + '"';
+    }
+    resultsStats.innerHTML =
+      '<span>Showing ' + results.length + (results.length === 1 ? ' phrase' : ' phrases') +
+      (label ? ' for ' + label : '') + '</span>';
 
-    resultsContainer.innerHTML = results.map((item, idx) => `
-      <article class="result-card" style="animation-delay: ${idx * 30}ms" data-guideline="${escapeHtml(item.guidelineId)}">
-        <header class="result-header">
-          <span class="result-guideline">
-            <a href="https://lms.ehc.gov.eg/lms/mod/book/view.php?id=${item.guidelineBookId}" target="_blank" rel="noopener">${escapeHtml(item.guidelineTitle)}</a>
-          </span>
-        </header>
-        <p class="result-phrase">${highlightText(item.phrase, query)}</p>
-        <div class="result-tags">
-          ${item.tags.slice(0, 6).map(t => `<span class="result-tag">${escapeHtml(t)}</span>`).join('')}
-          ${item.tags.length > 6 ? `<span class="result-tag">+${item.tags.length - 6} more</span>` : ''}
-        </div>
-      </article>
-    `).join('');
+    resultsContainer.innerHTML = results.map(function(item, idx) {
+      return '<article class="result-card" style="animation-delay:' + (idx * 20) + 'ms">' +
+        '<header class="result-header">' +
+          '<span class="result-guideline"><a href="https://lms.ehc.gov.eg/lms/mod/book/view.php?id=' + item.guidelineBookId + '" target="_blank" rel="noopener">' + escapeHtml(item.guidelineTitle) + '</a></span>' +
+        '</header>' +
+        '<p class="result-phrase">' + highlightText(item.phrase, query) + '</p>' +
+        '<div class="result-tags">' +
+          item.tags.slice(0, 8).map(function(t) { return '<span class="result-tag">' + escapeHtml(t) + '</span>'; }).join('') +
+          (item.tags.length > 8 ? '<span class="result-tag">+' + (item.tags.length - 8) + ' more</span>' : '') +
+        '</div>' +
+      '</article>';
+    }).join('');
   }
 
   function highlightText(text, query) {
-    if (!query) return escapeHtml(text);
-    const escaped = escapeHtml(text);
-    const regex = new RegExp(`(${escapeRegex(query)})`, 'gi');
+    var escaped = escapeHtml(text);
+    if (!query) return escaped;
+    var regex = new RegExp('(' + escapeRegex(query) + ')', 'gi');
     return escaped.replace(regex, '<mark>$1</mark>');
   }
 
@@ -180,41 +205,33 @@
   }
 
   function escapeHtml(str) {
-    return String(str).replace(/[&<>"']/g, c => ({
-      '&': '&', '<': '<', '>': '>', '"': '"', "'": '''
-    })[c]);
+    return String(str).replace(/[&<>"']/g, function(c) {
+      var map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+      return map[c];
+    });
   }
 
   function escapeRegex(str) {
     return String(str).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   }
 
-  // Event Listeners
-  searchInput.addEventListener('input', e => {
+  searchInput.addEventListener('input', function(e) {
     currentSearch = e.target.value;
     clearBtn.hidden = !currentSearch;
-    selectedTag = null;
-    tagsContainer.querySelectorAll('.tag-btn').forEach(b => {
-      b.classList.remove('selected');
-      b.setAttribute('aria-selected', 'false');
-    });
+    clearTagSelection();
     performSearch();
   });
 
-  clearBtn.addEventListener('click', () => {
+  clearBtn.addEventListener('click', function() {
     searchInput.value = '';
     currentSearch = '';
     clearBtn.hidden = true;
-    selectedTag = null;
-    tagsContainer.querySelectorAll('.tag-btn').forEach(b => {
-      b.classList.remove('selected');
-      b.setAttribute('aria-selected', 'false');
-    });
+    clearTagSelection();
     performSearch();
     searchInput.focus();
   });
 
-  searchInput.addEventListener('keydown', e => {
+  searchInput.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
       clearBtn.click();
     }
