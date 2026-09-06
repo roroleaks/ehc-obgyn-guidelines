@@ -10,20 +10,26 @@
     {
       "src": "/guidelines.json",
       "headers": {
-        "Cache-Control": "public, max-age=3600, stale-while-revalidate=86400",
+        "Cache-Control": "no-cache, no-store, must-revalidate",
         "Access-Control-Allow-Origin": "*"
       }
     },
     {
       "src": "/styles.css",
       "headers": {
-        "Cache-Control": "public, max-age=31536000, immutable"
+        "Cache-Control": "no-cache, must-revalidate"
       }
     },
     {
       "src": "/app.js",
       "headers": {
-        "Cache-Control": "public, max-age=31536000, immutable"
+        "Cache-Control": "no-cache, must-revalidate"
+      }
+    },
+    {
+      "src": "/index.html",
+      "headers": {
+        "Cache-Control": "no-cache, no-store, must-revalidate"
       }
     }
   ]
