@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EHC Obstetric & Gynecology Guidelines Search</title>
+  <meta name="description" content="Search Egyptian Health Council Obstetric and Gynecology Guidelines instantly by keyword or tag.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="header">
+    <div class="container header-content">
+      <a href="https://lms.ehc.gov.eg/lms/course/view.php?id=38" target="_blank" rel="noopener" class="logo-link" title="View source guidelines on EHC LMS">
+        <img src="https://lms.ehc.gov.eg/lms/pluginfile.php/1/theme_edumy/headerlogo2/1787819363/finalisa-en.png" alt="EHC Logo" class="logo" onerror="this.style.display='none'">
+        <span class="logo-text">EHC Guidelines</span>
+      </a>
+      <div class="header-info">
+        <h1>Obstetric & Gynecology Guidelines</h1>
+        <p class="source-link"><a href="https://lms.ehc.gov.eg/lms/course/view.php?id=38" target="_blank" rel="noopener">Source: Egyptian Health Council LMS →</a></p>
+      </div>
+    </div>
+  </header>
+
+  <main class="main container">
+    <section class="search-section" aria-labelledby="search-heading">
+      <h2 id="search-heading" class="visually-hidden">Search Guidelines</h2>
+      <div class="search-wrapper">
+        <label for="search-input" class="visually-hidden">Search for a keyword, tag, or phrase</label>
+        <div class="search-input-group">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><path d="M21 21l-4.35-4.35"></path></svg>
+          <input
+            type="search"
+            id="search-input"
+            class="search-input"
+            placeholder="Type a tag word (e.g., preeclampsia, cesarean, oxytocin, methotrexate)..."
+            autocomplete="off"
+            aria-describedby="search-hint"
+            spellcheck="false"
+          >
+          <button id="clear-search" class="clear-btn" aria-label="Clear search" hidden>×</button>
+        </div>
+        <p id="search-hint" class="search-hint">Results update instantly. Try tags like: <span class="hint-tags"></span></p>
+      </div>
+    </section>
+
+    <section class="tags-section" aria-labelledby="tags-heading">
+      <h2 id="tags-heading">Tag Words</h2>
+      <p class="tags-description">Click any tag to filter results instantly</p>
+      <div id="tags-container" class="tags-container" role="listbox" aria-label="Available tag words"></div>
+    </section>
+
+    <section class="results-section" aria-labelledby="results-heading" aria-live="polite">
+      <h2 id="results-heading">Search Results</h2>
+      <div id="results-stats" class="results-stats" aria-live="polite" hidden></div>
+      <div id="results-container" class="results-container"></div>
+      <div id="no-results" class="no-results" hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><path d="M21 21l-4.35-4.35"></path><path d="M8 8l6 6"></path><path d="M14 8l-6 6"></path></svg>
+        <p>No phrases found matching "<span id="search-term-display"></span>"</p>
+        <p class="no-results-hint">Try a different keyword or browse tags above</p>
+      </div>
+      <div id="initial-state" class="initial-state">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+        <h3>Start typing a medical keyword</h3>
+        <p>Instantly locate the relevant guideline section. Try <strong>preeclampsia</strong>, <strong>cesarean</strong>, <strong>oxytocin</strong>, or <strong>methotrexate</strong>.</p>
+        <p class="source-note">Source: <em>Obstetric and Gynecology Guidelines</em> — Egyptian Health Council</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <p>Clinical reference aid — does not replace clinical judgement.</p>
+      <p><a href="https://lms.ehc.gov.eg/lms/course/view.php?id=38" target="_blank" rel="noopener">View full guidelines on EHC LMS →</a></p>
+      <p class="copyright">© Egyptian Health Council</p>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,28 @@
+{
+  "name": "ehc-obgyn-guidelines",
+  "version": "1.0.0",
+  "description": "EHC Obstetric & Gynecology Guidelines Search - Instant keyword/tag search for Egyptian Health Council clinical guidelines",
+  "private": true,
+  "scripts": {
+    "dev": "npx serve . -p 3000",
+    "start": "npx serve . -p 3000",
+    "deploy": "vercel --prod"
+  },
+  "keywords": [
+    "ehc",
+    "egyptian-health-council",
+    "obstetrics",
+    "gynecology",
+    "clinical-guidelines",
+    "medical-reference"
+  ],
+  "author": "Egyptian Health Council",
+  "license": "MIT",
+  "devDependencies": {
+    "serve": "^14.2.0",
+    "vercel": "^32.0.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

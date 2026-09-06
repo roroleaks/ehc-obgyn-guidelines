@@ -1,0 +1,237 @@
+{
+  "source": "Egyptian Health Council - Obstetric and Gynecology Guidelines",
+  "sourceUrl": "https://lms.ehc.gov.eg/lms/course/view.php?id=38",
+  "lastUpdated": "2026-09-06",
+  "guidelines": [
+    {
+      "id": "cesarean-reduction",
+      "title": "Non-Clinical Interventions to Reduce Overall Cesarean Sections",
+      "bookId": 252,
+      "tags": ["Cesarean Section", "Non-Clinical Interventions", "Public Health", "Policy", "WHO Guidelines", "GRADE Methodology"],
+      "phrases": [
+        "The number of women who deliver by Cesarean section has increased steadily in Egypt over the last three decades, from 4.6% in 1992 to 51.8% in 2014.",
+        "Cesarean birth is associated with short- and long-term risks that can extend many years beyond the current delivery.",
+        "High rates of cesarean section are associated with substantial health-care costs.",
+        "Factors contributing to the rise include changes in population characteristics such as increase in multiple pregnancies and advanced maternal age.",
+        "Non-clinical factors include women wanting to determine how and when their child is born, fear of medical litigation, and organizational factors.",
+        "This guideline provides evidence-based recommendations on non-clinical interventions specifically designed to reduce cesarean sections.",
+        "Clinical interventions to reduce cesarean section rates are being prepared in a second guideline.",
+        "The guideline uses GRADE-Adolopment methodology adapted from WHO guidelines.",
+        "Target audience includes obstetricians, midwives, nurses, general practitioners, maternal health program managers, and public health policymakers."
+      ]
+    },
+    {
+      "id": "robson-classification",
+      "title": "Rationalizing Cesarean Section in Egypt through 10-Group Classification System",
+      "bookId": 646,
+      "tags": ["Robson Classification", "Cesarean Section", "Classification System", "Audit", "Quality Improvement"],
+      "phrases": [
+        "The 10-group Robson classification system categorizes all pregnant women into 10 mutually exclusive groups based on obstetric characteristics.",
+        "Implementing the Robson classification enables standardized audit and comparison of cesarean section rates across facilities.",
+        "Each group should be analyzed for its relative size and cesarean section rate to identify areas for intervention.",
+        "Group 1 (nulliparous, singleton, cephalic, term, spontaneous labor) and Group 2 (nulliparous, singleton, cephalic, term, induced/CS before labor) are key contributors.",
+        "Group 5 (multiparous with previous CS, singleton, cephalic, term) often has the highest CS rate.",
+        "Regular audit using Robson classification should be mandatory in all maternity units in Egypt.",
+        "Feedback of Robson classification data to clinicians reduces unnecessary cesarean sections."
+      ]
+    },
+    {
+      "id": "ectopic-pregnancy",
+      "title": "Diagnosis and Management of Ectopic Pregnancy & Pregnancy of Unknown Location",
+      "bookId": 652,
+      "tags": ["Ectopic Pregnancy", "Pregnancy of Unknown Location", "PUL", "Beta-hCG", "Transvaginal Ultrasound", "Methotrexate", "Laparoscopy"],
+      "phrases": [
+        "Ectopic pregnancy should be suspected in any woman of reproductive age with abdominal pain and vaginal bleeding.",
+        "Transvaginal ultrasound is the primary diagnostic tool; an empty uterus with beta-hCG >1500-2000 mIU/ml suggests ectopic pregnancy.",
+        "Pregnancy of Unknown Location (PUL) is defined as a positive pregnancy test with no visible intrauterine or extrauterine pregnancy on ultrasound.",
+        "Serial beta-hCG measurements (48-hour interval) are essential for PUL management: rising >53% suggests viable IUP, falling >50% suggests failed PUL.",
+        "Methotrexate (single dose 50mg/m2 IM) is first-line medical management for unruptured ectopic pregnancy with beta-hCG <5000 mIU/ml.",
+        "Laparoscopic salpingectomy is preferred for ruptured ectopic or failed medical management; salpingostomy may preserve fertility.",
+        "Anti-D immunoglobulin should be given to Rh-negative women after ectopic pregnancy management."
+      ]
+    },
+    {
+      "id": "hypertension-pregnancy",
+      "title": "Prevention and Treatment of Hypertension in Pregnancy",
+      "bookId": 653,
+      "tags": ["Hypertension", "Preeclampsia", "Gestational Hypertension", "Chronic Hypertension", "Aspirin", "Magnesium Sulfate", "Antihypertensives"],
+      "phrases": [
+        "Low-dose aspirin (75-150mg daily) from 12-16 weeks until 36 weeks is recommended for women at high risk of preeclampsia.",
+        "High risk factors for preeclampsia include: previous preeclampsia, chronic hypertension, diabetes, renal disease, autoimmune disease, multiple pregnancy.",
+        "Gestational hypertension: new-onset BP ≥140/90 mmHg after 20 weeks without proteinuria or other systemic features.",
+        "Preeclampsia: hypertension with proteinuria (≥300mg/24h or PCR ≥30mg/mmol) or maternal organ dysfunction.",
+        "Severe hypertension (≥160/110 mmHg) requires urgent treatment to prevent stroke; first-line IV labetalol or hydralazine.",
+        "Magnesium sulfate is indicated for seizure prophylaxis in severe preeclampsia and for treatment of eclampsia.",
+        "Delivery is the definitive treatment for preeclampsia; timing depends on gestational age, severity, and maternal/fetal condition.",
+        "Postpartum monitoring: hypertension can persist or develop de novo up to 6 weeks postpartum."
+      ]
+    },
+    {
+      "id": "pas",
+      "title": "Placenta Accreta Spectrum (PAS): Diagnosis and Management",
+      "bookId": 656,
+      "tags": ["Placenta Accreta", "Placenta Increta", "Placenta Percreta", "PAS", "MRI", "Ultrasound", "Multidisciplinary Team", "Hysterectomy"],
+      "phrases": [
+        "PAS includes placenta accreta (adherent to myometrium), increta (invading myometrium), and percreta (penetrating serosa/adjacent organs).",
+        "Major risk factors: previous cesarean section, placenta previa, prior uterine surgery, advanced maternal age, multiparity.",
+        "Antenatal diagnosis via transvaginal ultrasound (sensitivity 80-90%); MRI adjunctive for posterior placenta or suspected percreta.",
+        "Key ultrasound signs: loss of retroplacental clear zone, placental lacunae, myometrial thinning <1mm, bridging vessels.",
+        "Management requires multidisciplinary team: obstetrics, anesthesia, interventional radiology, urology, ICU, blood bank.",
+        "Planned preterm delivery at 34-36 weeks after corticosteroid administration; earlier if bleeding or complications.",
+        "Cesarean hysterectomy with placenta left in situ is standard for confirmed PAS; uterine conservation techniques for select cases.",
+        "Prophylactic internal iliac balloon catheter or ureteric stents may reduce blood loss in suspected percreta."
+      ]
+    },
+    {
+      "id": "endometriosis",
+      "title": "Diagnosis and Management of Endometriosis",
+      "bookId": 665,
+      "tags": ["Endometriosis", "Chronic Pelvic Pain", "Infertility", "Laparoscopy", "Hormonal Therapy", "Adenomyosis", "Deep Infiltrating Endometriosis"],
+      "phrases": [
+        "Endometriosis affects 10% of reproductive-age women; defined as endometrial-like tissue outside the uterine cavity.",
+        "Classic triad: dysmenorrhea, dyspareunia, chronic pelvic pain; infertility present in 30-50% of cases.",
+        "Transvaginal ultrasound and MRI can detect endometriomas and deep infiltrating endometriosis; laparoscopy remains gold standard for diagnosis.",
+        "First-line medical therapy: NSAIDs for pain, combined oral contraceptives or progestins for suppression.",
+        "GnRH agonists/antagonists with add-back therapy for moderate-severe pain refractory to first-line treatment.",
+        "Laparoscopic excision of endometriosis improves pain and fertility; hysterectomy with BSO for definitive treatment in completed families.",
+        "Deep infiltrating endometriosis involving bowel/bladder requires multidisciplinary surgical planning.",
+        "Assisted reproductive technology (IVF) is effective for endometriosis-associated infertility; surgery before IVF not routinely required."
+      ]
+    },
+    {
+      "id": "primary-cesarean-prevention",
+      "title": "Clinical Interventions for Prevention of Primary Cesarean Section",
+      "bookId": 670,
+      "tags": ["Primary Cesarean", "Labor Management", "Induction", "Breech", "Twins", "Fetal Monitoring", "Second Stage", "Operative Vaginal Delivery"],
+      "phrases": [
+        "Active phase of labor starts at 6 cm dilation; arrest diagnosed as no cervical change for ≥4 hours with adequate contractions or ≥6 hours with oxytocin.",
+        "Latent phase prolongation alone is not indication for cesarean; extended latent phase may be managed expectantly.",
+        "Routine amniotomy for labor augmentation not recommended; selective use with oxytocin may shorten labor.",
+        "Continuous electronic fetal monitoring increases cesarean rate without improving neonatal outcomes in low-risk women; intermittent auscultation preferred.",
+        "Category II fetal heart rate tracings require evaluation and intrauterine resuscitation; Category III requires immediate delivery.",
+        "External cephalic version (ECV) at 36-37 weeks reduces breech presentation and cesarean rate; success rate 50-60%.",
+        "Trial of labor after cesarean (TOLAC) success rate 60-80%; VBAC should be offered to eligible women with prior low-transverse CS.",
+        "Operative vaginal delivery (forceps/vacuum) reduces cesarean in second stage; requires skilled operator and appropriate indications.",
+        "Twin pregnancy with first twin cephalic: vaginal delivery recommended regardless of second twin presentation.",
+        "Maternal request cesarean without medical indication not recommended before 39 weeks; shared decision-making required."
+      ]
+    },
+    {
+      "id": "pph",
+      "title": "Primary Postpartum Hemorrhage",
+      "bookId": 713,
+      "tags": ["Postpartum Hemorrhage", "PPH", "Uterine Atony", "Oxytocin", "Misoprostol", "Tranexamic Acid", "Balloon Tamponade", "B-Lynch"],
+      "phrases": [
+        "PPH defined as blood loss ≥500ml after vaginal birth or ≥1000ml after cesarean section within 24 hours.",
+        "Active management of third stage: oxytocin 10 IU IM/IV within 1 minute of delivery, controlled cord traction, uterine massage.",
+        "Uterine atony causes 70-80% of PPH; first-line: uterine massage, oxytocin infusion, second-line: ergometrine, carboprost, misoprostol.",
+        "Tranexamic acid 1g IV within 3 hours of birth reduces death from bleeding by 30%; repeat dose if bleeding continues after 30 minutes.",
+        "Intrauterine balloon tamponade (Bakri, Foley) effective for atonic PPH refractory to uterotonics; success rate 80-90%.",
+        "Surgical interventions: B-Lynch suture, uterine artery ligation, internal iliac artery ligation, hysterectomy as last resort.",
+        "Massive transfusion protocol activation for anticipated blood loss >1500ml or ongoing hemorrhage; 1:1:1 ratio of RBC:FFP:platelets.",
+        "Secondary PPH (24h-6weeks): consider retained products, endometritis, subinvolution; ultrasound-guided evacuation if needed."
+      ]
+    },
+    {
+      "id": "nausea-vomiting",
+      "title": "Management of Nausea and Vomiting During Pregnancy",
+      "bookId": 716,
+      "tags": ["Nausea", "Vomiting", "Hyperemesis Gravidarum", "Pregnancy", "Doxylamine", "Pyridoxine", "Ondansetron", "Corticosteroids"],
+      "phrases": [
+        "Nausea and vomiting of pregnancy (NVP) affects 70-80% of pregnancies; hyperemesis gravidarum (severe form) affects 0.3-3%.",
+        "Diagnosis of hyperemesis: persistent vomiting, ketonuria, weight loss >5% pre-pregnancy weight, electrolyte imbalance.",
+        "First-line: dietary modification (small frequent meals, avoid triggers), ginger 250mg qid, acupressure P6 point.",
+        "Pharmacological first-line: doxylamine 10mg + pyridoxine 10mg (Diclectin) up to 4 tablets daily; safe in pregnancy.",
+        "Second-line: antihistamines (dimenhydrinate, diphenhydramine), metoclopramide, prochlorperazine.",
+        "Third-line: ondansetron 4-8mg q8h; limited data on cardiac defects but generally considered safe after first trimester.",
+        "Corticosteroids (methylprednisolone 16mg q8h tapering) for refractory hyperemesis after 10 weeks; avoid before 10 weeks due to cleft palate risk.",
+        "IV fluids for dehydration; thiamine 100mg before glucose to prevent Wernicke encephalopathy."
+      ]
+    },
+    {
+      "id": "normal-labor",
+      "title": "Normal Labor",
+      "bookId": 744,
+      "tags": ["Normal Labor", "Stages of Labor", "Partogram", "Fetal Monitoring", "Pain Relief", "Episiotomy", "Delayed Cord Clamping"],
+      "phrases": [
+        "First stage: latent phase (0-6cm) variable duration; active phase (≥6cm) progresses at ≥1cm/hour in nulliparas, ≥1.5cm/hour in multiparas.",
+        "Second stage: passive descent (full dilation without urge to push) up to 2 hours nullipara/1 hour multipara; active pushing up to 3 hours nullipara/2 hours multipara.",
+        "Partogram: alert line at 1cm/hour from 6cm; action line 4 hours after alert line triggers review and intervention.",
+        "Intermittent auscultation every 15-30 minutes in active first stage, every 5 minutes in second stage for low-risk women.",
+        "Upright positions and mobility in first stage shorten labor; continuous support (doula) reduces cesarean and improves satisfaction.",
+        "Epidural analgesia does not increase cesarean rate; may prolong second stage by 15-30 minutes.",
+        "Routine episiotomy not recommended; selective use for fetal distress or instrumental delivery.",
+        "Delayed cord clamping ≥1 minute improves iron stores; immediate clamping only if resuscitation needed.",
+        "Skin-to-skin contact immediately after birth for ≥1 hour promotes breastfeeding and thermoregulation."
+      ]
+    }
+  ],
+  "allTags": [
+    "Cesarean Section",
+    "Non-Clinical Interventions",
+    "Public Health",
+    "Policy",
+    "WHO Guidelines",
+    "GRADE Methodology",
+    "Robson Classification",
+    "Classification System",
+    "Audit",
+    "Quality Improvement",
+    "Ectopic Pregnancy",
+    "Pregnancy of Unknown Location",
+    "PUL",
+    "Beta-hCG",
+    "Transvaginal Ultrasound",
+    "Methotrexate",
+    "Laparoscopy",
+    "Hypertension",
+    "Preeclampsia",
+    "Gestational Hypertension",
+    "Chronic Hypertension",
+    "Aspirin",
+    "Magnesium Sulfate",
+    "Antihypertensives",
+    "Placenta Accreta",
+    "Placenta Increta",
+    "Placenta Percreta",
+    "PAS",
+    "MRI",
+    "Multidisciplinary Team",
+    "Hysterectomy",
+    "Endometriosis",
+    "Chronic Pelvic Pain",
+    "Infertility",
+    "Hormonal Therapy",
+    "Adenomyosis",
+    "Deep Infiltrating Endometriosis",
+    "Primary Cesarean",
+    "Labor Management",
+    "Induction",
+    "Breech",
+    "Twins",
+    "Fetal Monitoring",
+    "Second Stage",
+    "Operative Vaginal Delivery",
+    "Postpartum Hemorrhage",
+    "PPH",
+    "Uterine Atony",
+    "Oxytocin",
+    "Misoprostol",
+    "Tranexamic Acid",
+    "Balloon Tamponade",
+    "B-Lynch",
+    "Nausea",
+    "Vomiting",
+    "Hyperemesis Gravidarum",
+    "Doxylamine",
+    "Pyridoxine",
+    "Ondansetron",
+    "Corticosteroids",
+    "Normal Labor",
+    "Stages of Labor",
+    "Partogram",
+    "Pain Relief",
+    "Episiotomy",
+    "Delayed Cord Clamping"
+  ]
+}
