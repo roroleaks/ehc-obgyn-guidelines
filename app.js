@@ -189,7 +189,18 @@
   function highlightText(text, query) {
     var escaped = escapeHtml(text);
     if (!query) return escaped;
-    var regex = new RegExp('(' + escapeRegex(query) + ')', 'gi');
+    var words = query.split(/\s+/).filter(Boolean).map(escapeRegex);
+    if (!words.length) return escaped;
+
+    var pattern;
+    if (words.length > 1) {
+      // Highlight the full phrase if present, and each individual word otherwise
+      pattern = escapeRegex(query.trim()) + '|' + words.join('|');
+    } else {
+      pattern = words[0];
+    }
+
+    var regex = new RegExp('(' + pattern + ')', 'gi');
     return escaped.replace(regex, '<mark>$1</mark>');
   }
 
