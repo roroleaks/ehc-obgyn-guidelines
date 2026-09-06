@@ -174,11 +174,21 @@
         '</header>' +
         '<p class="result-phrase">' + highlightText(item.phrase, query) + '</p>' +
         '<div class="result-tags">' +
-          item.tags.slice(0, 8).map(function(t) { return '<span class="result-tag">' + escapeHtml(t) + '</span>'; }).join('') +
-          (item.tags.length > 8 ? '<span class="result-tag">+' + (item.tags.length - 8) + ' more</span>' : '') +
+          item.tags.map(function(t) { return '<button type="button" class="result-tag" data-search-tag="' + escapeHtml(t) + '">' + escapeHtml(t) + '</button>'; }).join('') +
         '</div>' +
       '</article>';
     }).join('');
+
+    // Clicking a small result tag performs a new search for that tag word
+    Array.prototype.forEach.call(resultsContainer.querySelectorAll('[data-search-tag]'), function(btn) {
+      btn.addEventListener('click', function() {
+        var tag = btn.getAttribute('data-search-tag');
+        searchInput.value = tag;
+        currentSearch = tag;
+        clearTagSelection();
+        performSearch();
+      });
+    });
   }
 
   function highlightText(text, query) {
