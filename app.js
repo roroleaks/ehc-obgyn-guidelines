@@ -28,6 +28,8 @@
         processData();
         renderTags();
         updateHintTags();
+        mergeCachedAutoBooks();
+        syncWithLms();
       })
       .catch(function(err) {
         console.error('Failed to load guidelines:', err);
@@ -215,6 +217,219 @@
     });
   }
 
+  // ---- Live auto-update from EHC LMS ----
+  var LMS_COURSE_URL = 'https://lms.ehc.gov.eg/lms/course/view.php?id=38';
+  var AUTO_CACHE_KEY = 'ehc_auto_guidelines_v1';
+  var syncStatusEl = document.getElementById('sync-status');
+
+  function setSyncStatus(msg) {
+    if (syncStatusEl) { syncStatusEl.textContent = msg; syncStatusEl.hidden = false; }
+  }
+
+  function mergeCachedAutoBooks() {
+    try {
+      var raw = localStorage.getItem(AUTO_CACHE_KEY);
+      if (!raw) return;
+      var cached = JSON.parse(raw);
+      var existing = {};
+      guidelinesData.guidelines.forEach(function(g) { existing[String(g.bookId)] = true; });
+      var added = false;
+      cached.forEach(function(g) {
+        if (!existing[String(g.bookId)]) {
+          guidelinesData.guidelines.push(g);
+          existing[String(g.bookId)] = true;
+          added = true;
+        }
+      });
+      if (added) {
+        processData();
+        renderTags();
+      }
+    } catch (e) { /* localStorage unavailable or corrupt */ }
+  }
+
+  function cacheAutoGuideline(g) {
+    try {
+      var raw = localStorage.getItem(AUTO_CACHE_KEY);
+      var arr = raw ? JSON.parse(raw) : [];
+      arr.push(g);
+      localStorage.setItem(AUTO_CACHE_KEY, JSON.stringify(arr));
+    } catch (e) { /* ignore */ }
+  }
+
+  function syncWithLms() {
+    setSyncStatus('Checking EHC LMS for new guidelines...');
+    fetch(LMS_COURSE_URL)
+      .then(function(res) {
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return res.text();
+      })
+      .then(function(html) {
+        var doc = new DOMParser().parseFromString(html, 'text/html');
+        var links = doc.querySelectorAll('a[href*="mod/book/view.php?id="]');
+        var books = {};
+        var order = [];
+        Array.prototype.forEach.call(links, function(a) {
+          var href = a.getAttribute('href');
+          if (!href) return;
+          var m = href.match(/mod\/book\/view\.php\?id=(\d+)/);
+          if (!m) return;
+          var id = m[1];
+          if (books[id]) return;
+          var rawTitle = (a.textContent || '').replace(/\s+/g, ' ').trim();
+          books[id] = { bookId: parseInt(id, 10), title: rawTitle.replace(/\s+Book\s*$/i, '') };
+          order.push(id);
+        });
+
+        var existing = {};
+        guidelinesData.guidelines.forEach(function(g) { existing[String(g.bookId)] = true; });
+
+        var additions = [];
+        order.forEach(function(id) {
+          if (!existing[id]) additions.push(books[id]);
+        });
+
+        if (!additions.length) {
+          setSyncStatus('Up to date with EHC LMS (' + order.length + ' guidelines).');
+          return;
+        }
+
+        setSyncStatus('Found ' + additions.length + ' new guideline(s) on EHC LMS. Ingesting...');
+        ingestBooks(additions, 0);
+      })
+      .catch(function(err) {
+        console.error('LMS sync failed:', err);
+        setSyncStatus('Live sync unavailable — app continues with the stored guidelines.');
+      });
+  }
+
+  function ingestBooks(books, i) {
+    if (i >= books.length) {
+      setSyncStatus('All new guidelines ingested. You can search them now.');
+      return;
+    }
+    ingestBook(books[i]).then(function(created) {
+      if (created) {
+        guidelinesData.guidelines.push(created);
+        cacheAutoGuideline(created);
+        processData();
+        renderTags();
+        if (currentSearch) performSearch();
+        setSyncStatus('Ingested "' + created.title + '" (' + (i + 1) + '/' + books.length + ').');
+      } else {
+        setSyncStatus('Could not read "' + books[i].title + '" contents; skipped.');
+      }
+      ingestBooks(books, i + 1);
+    });
+  }
+
+  function ingestBook(meta) {
+    var bookId = meta.bookId;
+    return fetch('https://lms.ehc.gov.eg/lms/mod/book/view.php?id=' + bookId)
+      .then(function(res) { return res.text(); })
+      .then(function(html) {
+        var doc = new DOMParser().parseFromString(html, 'text/html');
+        var chapterIds = [];
+        var seen = {};
+        var anchors = doc.querySelectorAll('a[href*="mod/book/view.php?id=' + bookId + '"][href*="chapterid"]');
+        Array.prototype.forEach.call(anchors, function(a) {
+          var href = a.getAttribute('href');
+          if (!href) return;
+          var m = href.match(/chapterid=(\d+)/);
+          if (m && !seen[m[1]]) {
+            seen[m[1]] = true;
+            chapterIds.push(parseInt(m[1], 10));
+          }
+        });
+
+        // Fallback: scan raw HTML for any chapter link
+        if (!chapterIds.length) {
+          var rawRe = /chapterid=(\d+)/g;
+          var rawM;
+          while ((rawM = rawRe.exec(html)) !== null) {
+            if (!seen[rawM[1]]) {
+              seen[rawM[1]] = true;
+              chapterIds.push(parseInt(rawM[1], 10));
+            }
+          }
+        }
+
+        if (!chapterIds.length) return null;
+
+        var queue = chapterIds.slice(0, 60);
+        var chain = Promise.resolve([]);
+        queue.forEach(function(cid) {
+          chain = chain.then(function(all) {
+            return fetch('https://lms.ehc.gov.eg/lms/mod/book/view.php?id=' + bookId + '&chapterid=' + cid)
+              .then(function(res) { return res.text(); })
+              .then(function(html2) {
+                var doc2 = new DOMParser().parseFromString(html2, 'text/html');
+                var content = doc2.getElementById('mod_book-chapter') || doc2.querySelector('.book_content');
+                if (!content) return all;
+                var text = content.textContent || '';
+                var title = (doc2.querySelector('h3, .mod_book_title') || {}).textContent || '';
+                if (title) text = title.replace(/^-?\s*/, '') + '\n\n' + text;
+                return all.concat([text]);
+              })
+              .catch(function() { return all; });
+          });
+        });
+
+        return chain.then(function(chunks) {
+          var phrases = extractPhrases(chunks.join('\n\n'));
+          if (!phrases.length) return null;
+
+          var tags = autoTags(phrases);
+          return {
+            id: 'lms-live-' + bookId,
+            title: meta.title || ('EHC OB/GYN Guideline ' + bookId),
+            bookId: bookId,
+            tags: tags,
+            phrases: phrases
+          };
+        });
+      })
+      .catch(function() { return null; });
+  }
+
+  function extractPhrases(text) {
+    var blocks = text.split(/\n\r?\n+/);
+    var phrases = [];
+    var seen = {};
+    blocks.forEach(function(block) {
+      var clean = block
+        .replace(/<[^>]+>/g, ' ')
+        .replace(/&amp;/g, '&')
+        .replace(/&nbsp;/g, ' ')
+        .replace(/[^\w\s.,()\/:%'°()\-]/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+      if (clean.length < 20) return;
+      var key = clean.toLowerCase().slice(0, 120);
+      if (seen[key]) return;
+      seen[key] = true;
+      phrases.push(clean);
+    });
+    return phrases;
+  }
+
+  function autoTags(phrases) {
+    var matches = {};
+    allTags.forEach(function(tag) {
+      var words = tag.toLowerCase().split(/\s+/).filter(Boolean);
+      if (!words.length) return;
+      var count = 0;
+      phrases.forEach(function(p) {
+        var pl = p.toLowerCase();
+        if (words.every(function(w) { return pl.indexOf(w) !== -1; })) count++;
+      });
+      if (count > 0) matches[tag] = count;
+    });
+    return Object.keys(matches)
+      .sort(function(a, b) { return matches[b] - matches[a]; })
+      .slice(0, 15);
+  }
+
   function escapeRegex(str) {
     return String(str).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   }
@@ -243,4 +458,9 @@
 
   // Initialize
   loadGuidelines();
+
+  // Periodically check for new guidelines while the app stays open
+  setInterval(function() {
+    if (guidelinesData) syncWithLms();
+  }, 30 * 60 * 1000);
 })();
