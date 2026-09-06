@@ -16,7 +16,7 @@
     "clinical-guidelines",
     "medical-reference"
   ],
-  "author": "Egyptian Health Council",
+  "author": "Dr. Raouf Roshdy",
   "license": "MIT",
   "devDependencies": {
     "serve": "^14.2.0",

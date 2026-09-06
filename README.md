@@ -84,4 +84,4 @@ npm run deploy   # optional: deploy with the Vercel CLI instead
 
 ## License
 
-MIT
+Copyright © 2026 Dr. Raouf Roshdy. Licensed under the [MIT License](LICENSE).
