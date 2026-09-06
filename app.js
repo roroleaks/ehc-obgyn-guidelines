@@ -15,7 +15,6 @@
   var noResults = document.getElementById('no-results');
   var searchTermDisplay = document.getElementById('search-term-display');
   var initialState = document.getElementById('initial-state');
-  var hintTagsEl = document.querySelector('.hint-tags');
 
   function loadGuidelines() {
     fetch('guidelines.json', { cache: 'no-store' })
@@ -27,7 +26,6 @@
         guidelinesData = data;
         processData();
         renderTags();
-        updateHintTags();
         mergeCachedAutoBooks();
         syncWithLms();
       })
@@ -83,13 +81,6 @@
     });
   }
 
-  function updateHintTags() {
-    if (!hintTagsEl) return;
-    var sample = ['preeclampsia', 'oxytocin', 'methotrexate', 'episiotomy', 'Robson Classification'];
-    var hint = sample.join(', ');
-    hintTagsEl.textContent = hint;
-  }
-
   function clearTagSelection() {
     selectedTag = null;
     Array.prototype.forEach.call(tagsContainer.querySelectorAll('.tag-btn'), function(b) {
@@ -122,6 +113,10 @@
     performSearch();
   }
 
+  function normalizeForMatch(str) {
+    return String(str).toLowerCase().replace(/ae/g, 'e');
+  }
+
   function performSearch() {
     var query = (currentSearch || '').trim().toLowerCase();
     var showInitial = !query;
@@ -134,15 +129,16 @@
     hideInitialState();
 
     var words = query.split(/\s+/).filter(Boolean);
-    // Deduplicate word forms so "oxytocin oxytocin" doesn't force double matches
+    // Deduplicate normalized word forms so "oxytocin oxytocin" doesn't force double matches
+    // and British/American spellings (caesarean/cesarean) match the same phrases
     var uniqueWords = [];
     words.forEach(function(w) {
-      var wl = w.toLowerCase();
-      if (uniqueWords.indexOf(wl) === -1) uniqueWords.push(wl);
+      var wn = normalizeForMatch(w);
+      if (uniqueWords.indexOf(wn) === -1) uniqueWords.push(wn);
     });
 
     var results = allPhrases.filter(function(item) {
-      var text = item.phrase.toLowerCase();
+      var text = normalizeForMatch(item.phrase);
       return uniqueWords.every(function(w) {
         return text.indexOf(w) !== -1;
       });
@@ -173,7 +169,7 @@
         '<header class="result-header">' +
           '<span class="result-guideline"><a href="https://lms.ehc.gov.eg/lms/mod/book/view.php?id=' + item.guidelineBookId + '" target="_blank" rel="noopener">' + escapeHtml(item.guidelineTitle) + '</a></span>' +
         '</header>' +
-        '<p class="result-phrase">' + highlightText(item.phrase, query) + '</p>' +
+        '<p class="result-phrase">' + colorizeType(highlightText(item.phrase, query)) + '</p>' +
         '<div class="result-tags">' +
           displayTags.map(function(t) { return '<button type="button" class="result-tag" data-search-tag="' + escapeHtml(t) + '">' + escapeHtml(t) + '</button>'; }).join('') +
         '</div>' +
@@ -196,18 +192,38 @@
   function highlightText(text, query) {
     var escaped = escapeHtml(text);
     if (!query) return escaped;
-    var words = query.split(/\s+/).filter(Boolean).map(escapeRegex);
-    if (!words.length) return escaped;
+    var rawWords = query.toLowerCase().split(/\s+/).filter(Boolean);
+    if (!rawWords.length) return escaped;
 
-    var pattern;
-    if (words.length > 1) {
-      pattern = escapeRegex(query.trim()) + '|' + words.join('|');
-    } else {
-      pattern = words[0];
+    // Include both British/American spellings (caesarean/cesarean) as highlight targets
+    var patterns = [];
+    function pushPattern(p) {
+      if (patterns.indexOf(p) === -1) patterns.push(p);
     }
+    if (rawWords.length > 1) {
+      pushPattern(escapeRegex(query.trim()));
+      if (query.indexOf('ae') !== -1) {
+        pushPattern(escapeRegex(query.trim().replace(/ae/g, 'e')));
+      }
+    }
+    rawWords.forEach(function(w) {
+      pushPattern(escapeRegex(w));
+      if (w.indexOf('ae') !== -1) {
+        // British -> American: caesarean -> cesarean
+        pushPattern(escapeRegex(w.replace(/ae/g, 'e')));
+      } else if (w.indexOf('e') !== -1) {
+        // American -> British: cesarean -> caesarean, hemorrhage -> haemorrhage
+        pushPattern(escapeRegex(w.replace('e', 'ae')));
+      }
+    });
 
-    var regex = new RegExp('(' + pattern + ')', 'gi');
+    var regex = new RegExp('(' + patterns.join('|') + ')', 'gi');
     return escaped.replace(regex, '<mark>$1</mark>');
+  }
+
+  function colorizeType(html) {
+    // Style the trailing recommendation type, e.g. "(Conditional)", "(Strong)", "(GPS)"
+    return html.replace(/\(([^()]*)\)(\s*\.?)$/, '<span class="phrase-type">($1)</span>$2');
   }
 
   function phraseRelevantTags(phraseText, guidelineTags, searchQuery) {
@@ -498,11 +514,11 @@
   function autoTags(phrases) {
     var matches = {};
     allTags.forEach(function(tag) {
-      var words = tag.toLowerCase().split(/\s+/).filter(Boolean);
+      var words = normalizeForMatch(tag).split(/\s+/).filter(Boolean);
       if (!words.length) return;
       var count = 0;
       phrases.forEach(function(p) {
-        var pl = p.toLowerCase();
+        var pl = normalizeForMatch(p);
         if (words.every(function(w) { return pl.indexOf(w) !== -1; })) count++;
       });
       if (count > 0) matches[tag] = count;
