@@ -186,6 +186,7 @@
         searchInput.value = tag;
         currentSearch = tag;
         clearTagSelection();
+        searchInput.blur();
         performSearch();
       });
     });
