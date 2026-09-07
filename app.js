@@ -64,6 +64,9 @@
       allTags = Object.keys(tagSet);
     }
 
+    // Always include auto-extracted tags that were added to the search library in this browser
+    mergeStoredNewTags();
+
     allTags = allTags.sort(function(a, b) { return a.localeCompare(b); });
   }
 
@@ -318,6 +321,7 @@
   // ---- Live auto-update from EHC LMS ----
   var LMS_COURSE_URL = 'https://lms.ehc.gov.eg/lms/course/view.php?id=38';
   var AUTO_CACHE_KEY = 'ehc_auto_guidelines_v1';
+  var AUTO_TAGS_KEY = 'ehc_auto_tags_v1';
   var syncStatusEl = document.getElementById('sync-status');
 
   function setSyncStatus(msg) {
@@ -352,6 +356,35 @@
       var arr = raw ? JSON.parse(raw) : [];
       arr.push(g);
       localStorage.setItem(AUTO_CACHE_KEY, JSON.stringify(arr));
+    } catch (e) { /* ignore */ }
+  }
+
+  // Auto-extracted tag words are stored in this browser so they survive reloads,
+  // merge them into the running search library (allTags).
+  function mergeStoredNewTags() {
+    try {
+      var raw = localStorage.getItem(AUTO_TAGS_KEY);
+      if (!raw) return;
+      var extra = JSON.parse(raw);
+      extra.forEach(function(t) {
+        if (!t) return;
+        var norm = String(t).toLowerCase().replace(/ae/g, 'e');
+        var exists = allTags.some(function(x) {
+          return x.toLowerCase().replace(/ae/g, 'e') === norm;
+        });
+        if (!exists) allTags.push(String(t));
+      });
+    } catch (e) { /* localStorage unavailable or corrupt */ }
+  }
+
+  function saveStoredNewTags(newTags) {
+    try {
+      var raw = localStorage.getItem(AUTO_TAGS_KEY);
+      var arr = raw ? JSON.parse(raw) : [];
+      newTags.forEach(function(t) {
+        if (arr.indexOf(t) === -1) arr.push(t);
+      });
+      localStorage.setItem(AUTO_TAGS_KEY, JSON.stringify(arr));
     } catch (e) { /* ignore */ }
   }
 
@@ -403,7 +436,7 @@
 
   function ingestBooks(books, i) {
     if (i >= books.length) {
-      setSyncStatus('All new guidelines ingested. You can search them now.');
+      setSyncStatus('All new guidelines ingested and indexed. New tag words were added to the search library.');
       return;
     }
     ingestBook(books[i]).then(function(created) {
@@ -413,7 +446,8 @@
         processData();
         renderTags();
         if (currentSearch) performSearch();
-        setSyncStatus('Ingested "' + created.title + '" (' + (i + 1) + '/' + books.length + ').');
+        setSyncStatus('Ingested "' + created.title + '" (' + (i + 1) + '/' + books.length + ')' +
+          (created.newTags && created.newTags.length ? ' — ' + created.newTags.length + ' new tag(s) added to the search library.' : '.'));
       } else {
         setSyncStatus('Could not read "' + books[i].title + '" contents; skipped.');
       }
@@ -478,11 +512,18 @@
           if (!phrases.length) return null;
 
           var tags = autoTags(phrases);
+          var newTags = extractNewTags(phrases);
+          if (newTags.length) saveStoredNewTags(newTags);
+          var allBookTags = tags.slice();
+          newTags.forEach(function(t) {
+            if (allBookTags.indexOf(t) === -1) allBookTags.push(t);
+          });
           return {
             id: 'lms-live-' + bookId,
             title: meta.title || ('EHC OB/GYN Guideline ' + bookId),
             bookId: bookId,
-            tags: tags,
+            tags: allBookTags.slice(0, 20),
+            newTags: newTags,
             phrases: phrases
           };
         });
@@ -526,6 +567,200 @@
     return Object.keys(matches)
       .sort(function(a, b) { return matches[b] - matches[a]; })
       .slice(0, 15);
+  }
+
+  // ---- Auto tag-word extraction for newly ingested guidelines ----
+  // Words that should never become tags (function words, judgement/type words, section noise)
+  var GENERIC_WORDS = {
+    a:1, an:1, the:1, and:1, or:1, of:1, to:1, in:1, on:1, for:1, with:1, by:1, at:1, from:1, as:1,
+    is:1, are:1, was:1, were:1, be:1, been:1, being:1, it:1, its:1, this:1, that:1, these:1, those:1,
+    they:1, them:1, their:1, there:1, has:1, have:1, had:1, do:1, does:1, did:1, can:1, could:1,
+    should:1, may:1, might:1, must:1, will:1, would:1, not:1, no:1, nor:1, but:1, if:1, then:1,
+    than:1, so:1, such:1, also:1, per:1, each:1, all:1, any:1, both:1, either:1, every:1, some:1,
+    more:1, most:1, less:1, least:1, other:1, others:1, only:1, between:1, among:1, during:1,
+    after:1, before:1, within:1, without:1, through:1, against:1, about:1, above:1, below:1,
+    into:1, onto:1, over:1, under:1, up:1, down:1, out:1, when:1, where:1, who:1, whom:1, which:1,
+    what:1, why:1, how:1, women:1, woman:1, patient:1, patients:1, use:1, used:1, using:1,
+    often:1, always:1, never:1, usually:1, generally:1, commonly:1, consider:1, considered:1,
+    recommended:1, recommendation:1, recommend:1, recommendations:1, advised:1, advise:1, offer:1,
+    offered:1, clinical:1, management:1, treatment:1, delivery:1, birth:1, childbirth:1, care:1,
+    guidance:1, advice:1, involve:1, involves:1, involving:1, include:1, includes:1, including:1,
+    based:1, according:1, regard:1, regards:1, regarding:1, point:1, points:1, key:1, note:1,
+    notes:1, background:1, introduction:1, methods:1, results:1, conclusion:1, conclusions:1,
+    summary:1, abstract:1, keywords:1, references:1, appendix:1, figure:1, table:1, first:1,
+    second:1, third:1, however:1, therefore:1, moreover:1, additionally:1, furthermore:1,
+    importantly:1, evidence:1, certainty:1, conditional:1, strong:1, gps:1, context:1, specific:1,
+    moderate:1, low:1, high:1, very:1, weak:1, good:1, practice:1, guideline:1, guidelines:1,
+    versus:1, vs:1, via:1, whether:1, unless:1, while:1, until:1, once:1, because:1, since:1,
+    although:1, though:1,
+    // generic context/time/action words that add no search value
+    weeks:1, hours:1, minutes:1, days:1, months:1, year:1, years:1, today:1, daily:1,
+    risk:1, risks:1, active:1, stage:1, labor:1, labour:1, severe:1,
+    adequate:1, appropriate:1, available:1, reduce:1, reducing:1, increase:1, increased:1,
+    performing:1, determine:1, subsequent:1, inform:1, requesting:1, delayed:1, depending:1,
+    associated:1, professionals:1, implementation:1, help:1, identify:1, implement:1,
+    avoid:1, failed:1, food:1, fluid:1, response:1, plus:1, sole:1, purpose:1, system:1,
+    relative:1, onset:1, symptom:1, symptoms:1, early:1, late:1, term:1, preterm:1,
+    cm:1, mmhg:1, kg:1, ml:1, mg:1, iu:1, mins:1, hcg:1,
+    // second-pass noise words (common adjectives/verbs/context words)
+    significant:1, greater:1, fewer:1, less:1, lesser:1, different:1, various:1,
+    reasons:1, reason:1, alone:1, line:1, medical:1, indication:1, indications:1,
+    particularly:1, especially:1, specifically:1, mostly:1, mainly:1, whose:1,
+    serum:1, egypt:1, prevention:1, level:1, levels:1, related:1, given:1,
+    diagnosed:1, performed:1, surgical:1, imaging:1, factors:1, pregnant:1, maternal:1,
+    progress:1, discuss:1, delay:1, routine:1, duration:1, confirmed:1, assessment:1,
+    known:1, protocol:1, clinicians:1, suspected:1, aware:1, prescribe:1, perform:1,
+    signs:1, expertise:1, previous:1, antenatal:1, developing:1, develop:1,
+    development:1, staining:1, reporting:1, improving:1, comparing:1, reducing:1,
+    developing:1, management:1, change:1, changes:1, improving:1, needed:1, required:1,
+    provides:1, provided:1, providing:1, using:1, showing:1, shown:1, suggest:1,
+    suggests:1, finding:1, findings:1, based:1,
+    // third-pass noise words seen in practice run
+    rigorous:1, research:1, local:1, opinion:1, leader:1, gestation:1, gestational:1,
+    hour:1, hourly:1, healthy:1, strongly:1, supplementation:1, measurements:1,
+    litre:1, litres:1, conditions:1, diagnose:1, major:1, minute:1, oral:1, agents:1
+  };
+
+  // Boundaries across which n-grams must never be formed
+  var NGRAM_BREAK = /[.;!?:"()\[\]{},/]/;
+
+  function isAbbreviation(token) {
+    return /^[A-Z]{2,}$/.test(token);
+  }
+
+  // A strong single word is specific enough to anchor a tag:
+  // real abbreviations (PPH, IVF, IUD) or longer, meaningful words
+  function isStrongWord(token) {
+    var lc = (token || '').toLowerCase();
+    if (!lc || /^\d+$/.test(lc)) return false;
+    if (lc.length === 1) return false;
+    if (GENERIC_WORDS[lc]) return false;
+    if (isAbbreviation(token)) return lc.length >= 3;
+    return lc.length >= 5;
+  }
+
+  // Whole-word overlap, tolerant of plurals ("cesarean sections" == "cesarean section")
+  function stripPlural(w) {
+    return w.length > 3 && w.slice(-1) === 's' ? w.slice(0, -1) : w;
+  }
+  function tagOverlap(a, b) {
+    a = stripPlural(a.toLowerCase());
+    b = stripPlural(b.toLowerCase());
+    if (a === b) return true;
+    function bw(hay, needle) {
+      return (' ' + hay.replace(/[^a-z0-9]+/g, ' ') + ' ').indexOf(' ' + needle + ' ') !== -1;
+    }
+    return bw(b, a) || bw(a, b);
+  }
+
+  // Reject any candidate already covered by a tag in the search library
+  function coveredByExistingTag(key) {
+    return allTags.some(function(x) {
+      return tagOverlap(key, x);
+    });
+  }
+
+  function labelizeTag(s) {
+    return s.split(' ').map(function(w) {
+      if (isAbbreviation(w)) return w;
+      return w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
+    }).join(' ');
+  }
+
+  function extractNewTags(phrases) {
+    if (!phrases || !phrases.length) return [];
+    var uniCount = {}, biCount = {}, triCount = {}, uniLabel = {}, uniOrig = {}, biLabel = {}, triLabel = {};
+
+    phrases.forEach(function(p) {
+      var text = String(p);
+      // Capture tokens with positions so n-grams never cross sentence/punctuation boundaries
+      var tokens = [], offsets = [];
+      var re = /[A-Za-z]+(?:'\w+)?/g, m;
+      while ((m = re.exec(text)) !== null) {
+        tokens.push(m[0]);
+        offsets.push(m.index);
+      }
+      var seenU = {}, seenB = {}, seenT = {};
+      for (var i = 0; i < tokens.length; i++) {
+        var t1 = tokens[i], l1 = t1.toLowerCase();
+
+        // Unigram candidate
+        if (isStrongWord(t1) && !seenU[l1] && !coveredByExistingTag(l1)) {
+          seenU[l1] = true;
+          uniCount[l1] = (uniCount[l1] || 0) + 1;
+          if (!uniLabel[l1]) uniLabel[l1] = t1;
+          if (!uniOrig[l1]) uniOrig[l1] = t1;
+        }
+
+        // Bigram / trigram candidates (same sentence, no punctuation across)
+        if (i + 1 >= tokens.length) continue;
+        var gap1 = text.slice(offsets[i] + t1.length, offsets[i + 1]);
+        if (NGRAM_BREAK.test(gap1)) continue;
+
+        var t2 = tokens[i + 1], l2 = t2.toLowerCase();
+        if (validNgram([t1, t2])) {
+          var key2 = l1 + ' ' + l2;
+          if (!seenB[key2] && !coveredByExistingTag(key2)) {
+            seenB[key2] = true;
+            biCount[key2] = (biCount[key2] || 0) + 1;
+            if (!biLabel[key2]) biLabel[key2] = t1 + ' ' + t2;
+          }
+        }
+        if (i + 2 < tokens.length) {
+          var gap2 = text.slice(offsets[i + 1] + t2.length, offsets[i + 2]);
+          if (!NGRAM_BREAK.test(gap2)) {
+            var t3 = tokens[i + 2], l3 = t3.toLowerCase();
+            if (validNgram([t1, t2, t3])) {
+              var key3 = l1 + ' ' + l2 + ' ' + l3;
+              if (!seenT[key3] && !coveredByExistingTag(key3)) {
+                seenT[key3] = true;
+                triCount[key3] = (triCount[key3] || 0) + 1;
+                if (!triLabel[key3]) triLabel[key3] = t1 + ' ' + t2 + ' ' + t3;
+              }
+            }
+          }
+        }
+      }
+    });
+
+    function validNgram(toks) {
+      var lower = toks.map(function(t) { return t.toLowerCase(); });
+      var joint = lower.join(' ');
+      var anyStrong = toks.some(isStrongWord);
+      var okLength = joint.length >= (toks.length === 2 ? 10 : 13);
+      var allOk = toks.every(function(t, i) {
+        var lc = lower[i];
+        return lc.length >= 3 && !GENERIC_WORDS[lc];
+      });
+      return okLength && allOk && anyStrong;
+    }
+
+    var candidates = [];
+    Object.keys(uniCount).forEach(function(k) {
+      // Keep frequent single words (>=2) that are capitalized (named concepts/drugs)
+      // or strongly recurring (>=3) even when written in lowercase
+      if (uniCount[k] >= 2 && (/^[A-Z]/.test(uniOrig[k]) || uniCount[k] >= 3)) {
+        candidates.push({ label: labelizeTag(uniLabel[k]), score: uniCount[k] * 10 });
+      }
+    });
+    Object.keys(biCount).forEach(function(k) {
+      if (biCount[k] >= 2) candidates.push({ label: labelizeTag(biLabel[k]), score: biCount[k] * 22 + 11 });
+    });
+    Object.keys(triCount).forEach(function(k) {
+      if (triCount[k] >= 2) candidates.push({ label: labelizeTag(triLabel[k]), score: triCount[k] * 33 + 22 });
+    });
+
+    // Select highest-scoring candidates, dropping any that overlap an already-chosen tag
+    var result = [], accepted = [];
+    candidates
+      .sort(function(a, b) { return b.score - a.score || a.label.localeCompare(b.label); })
+      .forEach(function(c) {
+        var dup = accepted.some(function(a) { return tagOverlap(a, c.label); });
+        if (dup) return;
+        accepted.push(c.label);
+        result.push(c.label);
+      });
+    return result.slice(0, 15);
   }
 
   function escapeRegex(str) {
