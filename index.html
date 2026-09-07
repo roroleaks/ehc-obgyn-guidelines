@@ -48,7 +48,20 @@
           >
           <button type="button" id="clear-search" class="clear-btn" aria-label="Clear search" hidden>×</button>
         </div>
-        <p id="search-hint" class="search-hint">Type a tag word below — the full recommendation phrases containing it appear instantly.</p>
+        <p id="search-hint" class="search-hint">Type a keyword below — all matching phrases appear instantly.</p>
+        <details id="search-help" class="search-help">
+          <summary id="search-help-toggle" class="search-help-toggle">Search help</summary>
+          <div class="search-help-content">
+            <ul>
+              <li>Enter one or more words. <strong>All words must appear</strong> in each result.</li>
+              <li>British and American spellings are matched automatically (e.g. <em>caesarean</em> finds <em>cesarean</em>; <em>haemorrhage</em> finds <em>hemorrhage</em>).</li>
+              <li>Singular and plural forms are matched where safe (e.g. <em>glove</em> finds <em>gloves</em>).</li>
+              <li>Short prefixes (≥4 characters) are matched when no full-word results exist (e.g. <em>gestat</em> finds <em>gestational</em>).</li>
+              <li>Click a tag button or press Enter to search for that word.</li>
+              <li>Press <kbd>Esc</kbd> or the <strong>×</strong> button to clear.</li>
+            </ul>
+          </div>
+        </details>
         <p id="sync-status" class="sync-status" hidden></p>
       </div>
     </section>
@@ -70,7 +83,7 @@
       <div id="no-results" class="no-results" hidden>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><path d="M21 21l-4.35-4.35"></path><path d="M8 8l6 6"></path><path d="M14 8l-6 6"></path></svg>
         <p><span class="no-results-badge">Not Found</span></p>
-        <p>No phrases match "<strong id="search-term-display"></strong>"</p>
+        <p>No phrases match "<strong></strong>"</p>
         <p class="no-results-hint">Try a different keyword or browse the tag words above</p>
       </div>
       <div id="initial-state" class="initial-state">

@@ -11,6 +11,17 @@
   var currentSearch = '';
   var selectedTag = null;
 
+  // Bi-directional spelling/abbreviation variants safe for normalized matching.
+  // Keys and values are lowercase.
+  var VARIANT_MAP = Object.freeze({
+    caesarean: 'cesarean', csection: 'c-section',
+    haemorrhage: 'hemorrhage', oedema: 'edema', anaemia: 'anemia',
+    labour: 'labor', foetal: 'fetal', neonatal: 'newborn',
+    sulphate: 'sulfate', bpd: 'bilateral pupil diameter',
+    ivg: 'intravenous glucose', im: 'intramuscular',
+    iu: 'international units', mcg: 'micrograms', hctz: 'hydrochlorothiazide'
+  });
+
   var searchInput = document.getElementById('search-input');
   var clearBtn = document.getElementById('clear-search');
   var tagsContainer = document.getElementById('tags-container');
@@ -19,9 +30,10 @@
   var resultsContainer = document.getElementById('results-container');
   var resultsStats = document.getElementById('results-stats');
   var noResults = document.getElementById('no-results');
-  var searchTermDisplay = document.getElementById('search-term-display');
   var initialState = document.getElementById('initial-state');
   var statusRegion = document.getElementById('status-region');
+  var searchHelpToggle = document.getElementById('search-help-toggle');
+  var searchHelpPanel = document.getElementById('search-help');
   var lastAnnouncement = '';
 
   // Single scoped live region for all search/sync status announcements, so
@@ -49,6 +61,15 @@
     });
   }
 
+  // Search help panel toggle
+  if (searchHelpToggle && searchHelpPanel) {
+    searchHelpToggle.addEventListener('click', function() {
+      var expanded = searchHelpPanel.open;
+      searchHelpToggle.setAttribute('aria-expanded', String(!expanded));
+      searchHelpToggle.textContent = expanded ? 'Search help' : 'Hide search help';
+    });
+  }
+
   function loadGuidelines() {
     fetch('guidelines.json', { cache: 'no-store' })
       .then(function(res) {
@@ -61,6 +82,15 @@
         renderTags();
         mergeCachedAutoBooks();
         syncWithLms();
+        // Restore query from URL (?q=...) on initial load
+        var urlQuery = readQueryFromUrl();
+        if (urlQuery) {
+          searchInput.value = urlQuery;
+          currentSearch = urlQuery.toLowerCase();
+          clearBtn.hidden = false;
+          if (selectedTag) clearTagSelection();
+          performSearch();
+        }
       })
       .catch(function(err) {
         console.error('Failed to load guidelines:', err);
@@ -170,10 +200,12 @@
       selectedTag = tag;
       searchInput.value = tag;
       currentSearch = tag.toLowerCase();
+      pushQueryState(tag);
     } else {
       selectedTag = null;
       searchInput.value = '';
       currentSearch = '';
+      pushQueryState('');
     }
 
     performSearch();
@@ -196,7 +228,99 @@
   }
 
   function normalizeForMatch(str) {
-    return String(str).toLowerCase().replace(/ae/g, 'e');
+    return String(str).toLowerCase().replace(/ae/g, 'e').replace(/oe/g, 'e');
+  }
+
+  var _variantSet = null;
+  function buildVariantSet() {
+    if (_variantSet) return _variantSet;
+    _variantSet = Object.create(null);
+    Object.keys(VARIANT_MAP).forEach(function(k) {
+      _variantSet[normalizeForMatch(k)] = true;
+      _variantSet[normalizeForMatch(VARIANT_MAP[k])] = true;
+    });
+    return _variantSet;
+  }
+
+  function variantifyQuery(word) {
+    var variants = [word];
+    Object.keys(VARIANT_MAP).forEach(function(k) {
+      if (normalizeForMatch(k) === word) variants.push(normalizeForMatch(VARIANT_MAP[k]));
+      if (normalizeForMatch(VARIANT_MAP[k]) === word) variants.push(normalizeForMatch(k));
+    });
+    return variants;
+  }
+
+  function stripTrailingS(w) {
+    if (w.length <= 2 || w.slice(-1) !== 's') return [w];
+    var forms = [w];
+    var base = w.slice(0, -1);
+    forms.push(base);
+    if (w.slice(-2) === 'es' && base.length > 2) forms.push(base);
+    if (w.slice(-3) === 'ies' && base.length > 2) forms.push(base.slice(0, -1) + 'y');
+    return forms;
+  }
+
+  // --- URL state (?q=) ---
+  var _urlTimer = null;
+  // Debounce only the URL write so keystrokes don't spam browser history.
+  // The search itself stays instant (runs on every input event).
+  function scheduleQueryStateUpdate(q) {
+    if (_urlTimer !== null) clearTimeout(_urlTimer);
+    _urlTimer = setTimeout(function() {
+      _urlTimer = null;
+      pushQueryState(q);
+    }, 250);
+  }
+  function pushQueryState(q) {
+    var url = new URL(window.location.href);
+    if (q) url.searchParams.set('q', q);
+    else url.searchParams.delete('q');
+    window.history.pushState({}, '', url.toString());
+  }
+  function readQueryFromUrl() {
+    var url = new URL(window.location.href);
+    return (url.searchParams.get('q') || '').trim();
+  }
+
+  // --- Result classification ---
+  // All spellings/singular forms that can represent a normalized search word (OR set).
+  function wordForms(w) {
+    var forms = [];
+    function push(f) { if (forms.indexOf(f) === -1) forms.push(f); }
+    variantifyQuery(w).forEach(push);
+    stripTrailingS(w).forEach(push);
+    return forms;
+  }
+  function phraseHasWordSubstring(phraseNorm, w) {
+    return wordForms(w).some(function(f) { return phraseNorm.indexOf(f) !== -1; });
+  }
+  function phraseHasWordWhole(phraseNorm, w) {
+    return wordForms(w).some(function(f) {
+      return new RegExp('(^|[^a-z])' + escapeRegex(f) + '($|[^a-z])').test(phraseNorm);
+    });
+  }
+  function classifyResults(results, qWords) {
+    var exact = 0, prefix = 0, related = 0;
+    results.forEach(function(item) {
+      var phraseNorm = normalizeForMatch(item.phrase);
+      if (qWords.every(function(w) { return phraseHasWordWhole(phraseNorm, w); })) exact++;
+      else related++;
+    });
+    return { exact: exact, prefix: prefix, related: related };
+  }
+  function findVariantSuggestion(query) {
+    var words = query.split(/\s+/).filter(Boolean);
+    var vs = buildVariantSet();
+    var suggestion = null;
+    words.some(function(w) {
+      var variants = variantifyQuery(w);
+      return variants.some(function(v) {
+        if (v !== w && vs[v]) { suggestion = { from: w, to: v }; return true; }
+        return false;
+      });
+    });
+    return suggestion;
   }
 
   function performSearch() {
@@ -211,36 +335,40 @@
     hideInitialState();
 
     var words = query.split(/\s+/).filter(Boolean);
-    // Deduplicate normalized word forms so "oxytocin oxytocin" doesn't force double matches
-    // and British/American spellings (caesarean/cesarean) match the same phrases
     var uniqueWords = [];
     words.forEach(function(w) {
       var wn = normalizeForMatch(w);
       if (uniqueWords.indexOf(wn) === -1) uniqueWords.push(wn);
     });
 
+    // AND across words (all terms must appear), OR within each word's
+    // variant/singular forms: "cesarean sections" matches phrases containing
+    // "cesarean section" or "cesarean sections".
     var results = filterByWords(uniqueWords, false);
+    var classification = classifyResults(results, uniqueWords);
 
-    // Free-form words typed manually (not necessarily a tag word): if nothing matched
-    // as a substring, fall back to prefix matching so "gestat" finds "gestational".
+    // Single word >= 4 chars: prefix fallback if substring matching yields nothing
+    var isPrefix = false;
     if (results.length === 0 && uniqueWords.length === 1 && uniqueWords[0].length >= 4) {
       var prefixed = filterByWords(uniqueWords, true);
       if (prefixed.length) {
-        renderResults(prefixed, query, uniqueWords, true);
-        return;
+        results = prefixed;
+        isPrefix = true;
+        classification = { exact: 0, prefix: prefixed.length, related: 0 };
       }
     }
 
-    renderResults(results, query, uniqueWords);
+    // Suggest a known spelling variant (e.g. "cesarean" for "caesarean") when nothing matches
+    var variantSuggestion = findVariantSuggestion(query);
+
+    renderResults(results, query, uniqueWords, isPrefix, classification, variantSuggestion);
   }
 
-  // Strict substring match, or prefix-of-a-word match when usePrefix is set.
-  // Works on ae-normalized text so caesarean/cesarean both match.
   function filterByWords(uniqueWords, usePrefix) {
     return allPhrases.filter(function(item) {
       var text = normalizeForMatch(item.phrase);
       return uniqueWords.every(function(w) {
-        if (text.indexOf(w) !== -1) return true;
+        if (phraseHasWordSubstring(text, w)) return true;
         if (usePrefix && w.length >= 4) {
           return new RegExp('(^|[^a-z])' + escapeRegex(w) + '[a-z]*').test(text);
         }
@@ -249,13 +377,42 @@
     });
   }
 
-  function renderResults(results, query, words, prefixMatch) {
+  function renderResults(results, query, words, isPrefix, classification, variantSuggestion) {
     if (results.length === 0) {
       resultsContainer.innerHTML = '';
       resultsStats.hidden = true;
       resultsStats.textContent = '';
       noResults.hidden = false;
-      searchTermDisplay.textContent = query;
+
+      // Enhanced no-results messaging (built with escaped query — no duplicate ids)
+      var nh = '';
+      nh += '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><path d="M21 21l-4.35-4.35"></path><path d="M8 8l6 6"></path><path d="M14 8l-6 6"></path></svg>';
+      nh += '<p><span class="no-results-badge">Not Found</span></p>';
+      nh += '<p>No phrases match "<strong>' + escapeHtml(query) + '</strong>"</p>';
+      if (words.length > 1) {
+        nh += '<p class="no-results-hint">All search terms must appear in each result. Try removing one word or shortening a term.</p>';
+      } else {
+        nh += '<p class="no-results-hint">Try a different keyword or browse the tag words above.</p>';
+      }
+      if (variantSuggestion) {
+        nh += '<p class="no-results-hint"><strong>Did you mean <a href="#" class="variant-suggestion" data-variant="' + escapeHtml(variantSuggestion.to) + '">' + escapeHtml(variantSuggestion.to) + '</a> instead of ' + escapeHtml(variantSuggestion.from) + '?</strong></p>';
+      }
+      noResults.innerHTML = nh;
+
+      // Bind variant suggestion link if present
+      var vsLink = noResults.querySelector('.variant-suggestion');
+      if (vsLink) {
+        vsLink.addEventListener('click', function(e) {
+          e.preventDefault();
+          var v = vsLink.getAttribute('data-variant');
+          searchInput.value = v;
+          currentSearch = v;
+          pushQueryState(v);
+          if (selectedTag) clearTagSelection();
+          performSearch();
+        });
+      }
+
       announce('No phrases match "' + query + '". No results found.');
       return;
     }
@@ -263,13 +420,11 @@
     noResults.hidden = true;
     resultsStats.hidden = false;
 
-    // Clear any stale/previous content first so the old result count or cards
-    // are never left in the DOM (and never exposed to assistive tech).
+    // Clear stale content before rebuilding so the old count or cards are
+    // never left in the DOM or exposed to assistive tech.
     resultsStats.textContent = '';
     resultsContainer.innerHTML = '';
 
-    // Build the full card list BEFORE updating the DOM so the count and the cards
-    // always appear together — never a "found N" message with no visible cards.
     try {
       var cards = results.map(function(item, idx) {
         var displayTags = phraseRelevantTags(item.phrase, item.tags || [], query);
@@ -284,16 +439,25 @@
         '</article>';
       }).join('');
 
-      resultsStats.innerHTML =
-        '<span>Showing ' + results.length + (results.length === 1 ? ' phrase' : ' phrases') +
-        ' containing all terms' + (prefixMatch ? ' by prefix' : '') + ': <strong>"' + escapeHtml(query) + '"</strong></span>';
+      // Build classification-aware stats text (plain text — no innerHTML — safe from XSS)
+      var c = classification || { exact: 0, prefix: 0, related: 0 };
+      var totalParts = [];
+      if (c.exact > 0) totalParts.push(c.exact + ' exact');
+      if (c.related > 0) totalParts.push(c.related + ' related');
+      if (c.prefix > 0 || isPrefix) totalParts.push((c.prefix || results.length) + (isPrefix ? ' by prefix' : ' broader'));
+      var breakdown = totalParts.length ? ' \u2014 ' + totalParts.join(', ') : '';
+
+      var allTermsNote = words.length > 1 ? ', all terms matched' : '';
+      var prefixNote = isPrefix ? ' (prefix match)' : '';
+
+      var statsText = 'Showing ' + results.length + (results.length === 1 ? ' phrase' : ' phrases') +
+        ' for "' + query + '"' + prefixNote + allTermsNote + breakdown + '.';
+      resultsStats.textContent = statsText;
       resultsContainer.innerHTML = cards;
     } catch (e) {
       console.error('renderResults failed:', e);
       resultsContainer.innerHTML = '';
-      resultsStats.innerHTML =
-        '<span>Found ' + results.length + (results.length === 1 ? ' phrase' : ' phrases') +
-        ' but could not display them. Try a shorter or more exact word.</span>';
+      resultsStats.textContent = 'Found ' + results.length + (results.length === 1 ? ' phrase' : ' phrases') + ' but could not display them. Try a shorter or more exact word.';
     }
 
     announce(results.length + (results.length === 1 ? ' phrase' : ' phrases') + ' found.');
@@ -304,10 +468,10 @@
         var tag = btn.getAttribute('data-search-tag');
         searchInput.value = tag;
         currentSearch = tag;
+        pushQueryState(tag);
         clearTagSelection();
         searchInput.blur();
         performSearch();
-        // Move focus to the results heading so updated results are discoverable.
         var resultsHeading = document.getElementById('results-heading');
         if (resultsHeading) {
           resultsHeading.focus({ preventScroll: false });
@@ -980,7 +1144,8 @@
   searchInput.addEventListener('input', function(e) {
     currentSearch = e.target.value;
     clearBtn.hidden = !currentSearch;
-    clearTagSelection();
+    if (selectedTag) clearTagSelection();
+    scheduleQueryStateUpdate(currentSearch);
     performSearch();
   });
 
@@ -988,7 +1153,8 @@
     searchInput.value = '';
     currentSearch = '';
     clearBtn.hidden = true;
-    clearTagSelection();
+    if (selectedTag) clearTagSelection();
+    pushQueryState('');
     performSearch();
     searchInput.focus();
   });
@@ -996,6 +1162,21 @@
   searchInput.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
       clearBtn.click();
+    }
+  });
+
+  // Browser back/forward restores query from URL
+  window.addEventListener('popstate', function() {
+    var q = readQueryFromUrl();
+    searchInput.value = q;
+    currentSearch = q;
+    clearBtn.hidden = !q;
+    if (q) {
+      if (selectedTag) clearTagSelection();
+      performSearch();
+    } else {
+      clearTagSelection();
+      showInitialState();
     }
   });
 
