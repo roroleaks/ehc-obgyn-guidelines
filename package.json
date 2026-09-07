@@ -6,7 +6,10 @@
   "scripts": {
     "dev": "npx serve . -p 3000",
     "start": "npx serve . -p 3000",
-    "deploy": "vercel --prod"
+    "deploy": "vercel --prod",
+    "test": "node --check app.js && node tests/run-all.js",
+    "test:syntax": "node --check app.js",
+    "test:harnesses": "node tests/run-all.js"
   },
   "keywords": [
     "ehc",

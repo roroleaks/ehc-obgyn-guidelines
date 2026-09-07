@@ -1,0 +1,47 @@
+name: QA
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  qa:
+    name: Syntax + full QA suite
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js LTS
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      # All harnesses rely only on Node built-ins (http/fs/path/child_process).
+      # No npm dependency install is needed to run the QA suite.
+      - name: Confirm no install step is required
+        run: echo "Tests use only Node built-ins; skipping npm install."
+
+      - name: Verify Chrome/Chromium and export CHROME_BIN
+        run: |
+          chrome_bin=""
+          for c in google-chrome google-chrome-stable chromium-browser chromium; do
+            if command -v "$c" >/dev/null 2>&1; then chrome_bin="$(command -v "$c")"; break; fi
+          done
+          if [ -z "$chrome_bin" ]; then
+            echo "::error::No Chrome/Chromium binary found on runner."
+            exit 1
+          fi
+          echo "CHROME_BIN=$chrome_bin" >> "$GITHUB_ENV"
+          "$chrome_bin" --version
+
+      - name: Syntax validation
+        run: npm run test:syntax
+
+      - name: Run full QA suite
+        run: npm test
