@@ -214,12 +214,11 @@ img { max-width: 100%; height: auto; display: block; }
   padding: 1.25rem;
   box-shadow: var(--shadow-sm);
   transition: box-shadow var(--transition), border-color var(--transition), transform var(--transition);
-  animation: fadeInUp 0.2s ease forwards;
-  opacity: 0;
-  transform: translateY(8px);
+  animation: fadeInUp 0.25s ease backwards;
+  opacity: 1;
 }
 .result-card:hover { box-shadow: var(--shadow-md); border-color: #c5d0da; transform: translateY(-1px); }
-@keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
+@keyframes fadeInUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
 .result-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 0.75rem; flex-wrap: wrap; }
 .result-guideline { font-size: 0.875rem; font-weight: 600; color: var(--color-primary); white-space: nowrap; }

@@ -140,17 +140,37 @@
       if (uniqueWords.indexOf(wn) === -1) uniqueWords.push(wn);
     });
 
-    var results = allPhrases.filter(function(item) {
-      var text = normalizeForMatch(item.phrase);
-      return uniqueWords.every(function(w) {
-        return text.indexOf(w) !== -1;
-      });
-    });
+    var results = filterByWords(uniqueWords, false);
+
+    // Free-form words typed manually (not necessarily a tag word): if nothing matched
+    // as a substring, fall back to prefix matching so "gestat" finds "gestational".
+    if (results.length === 0 && uniqueWords.length === 1 && uniqueWords[0].length >= 4) {
+      var prefixed = filterByWords(uniqueWords, true);
+      if (prefixed.length) {
+        renderResults(prefixed, query, uniqueWords, true);
+        return;
+      }
+    }
 
     renderResults(results, query, uniqueWords);
   }
 
-  function renderResults(results, query, words) {
+  // Strict substring match, or prefix-of-a-word match when usePrefix is set.
+  // Works on ae-normalized text so caesarean/cesarean both match.
+  function filterByWords(uniqueWords, usePrefix) {
+    return allPhrases.filter(function(item) {
+      var text = normalizeForMatch(item.phrase);
+      return uniqueWords.every(function(w) {
+        if (text.indexOf(w) !== -1) return true;
+        if (usePrefix && w.length >= 4) {
+          return new RegExp('(^|[^a-z])' + escapeRegex(w) + '[a-z]*').test(text);
+        }
+        return false;
+      });
+    });
+  }
+
+  function renderResults(results, query, words, prefixMatch) {
     if (results.length === 0) {
       resultsContainer.innerHTML = '';
       resultsStats.hidden = true;
@@ -160,24 +180,35 @@
     }
 
     noResults.hidden = true;
-
     resultsStats.hidden = false;
-    resultsStats.innerHTML =
-      '<span>Showing ' + results.length + (results.length === 1 ? ' phrase' : ' phrases') +
-      ' containing all terms: <strong>"' + escapeHtml(query) + '"</strong></span>';
 
-    resultsContainer.innerHTML = results.map(function(item, idx) {
-      var displayTags = phraseRelevantTags(item.phrase, item.tags, query);
-      return '<article class="result-card" style="animation-delay:' + (idx * 20) + 'ms">' +
-        '<header class="result-header">' +
-          '<span class="result-guideline"><a href="https://lms.ehc.gov.eg/lms/mod/book/view.php?id=' + item.guidelineBookId + '" target="_blank" rel="noopener">' + escapeHtml(item.guidelineTitle) + '</a></span>' +
-        '</header>' +
-        '<p class="result-phrase">' + colorizeType(highlightText(item.phrase, query)) + '</p>' +
-        '<div class="result-tags">' +
-          displayTags.map(function(t) { return '<button type="button" class="result-tag" data-search-tag="' + escapeHtml(t) + '">' + escapeHtml(t) + '</button>'; }).join('') +
-        '</div>' +
-      '</article>';
-    }).join('');
+    // Build the full card list BEFORE updating the DOM so the count and the cards
+    // always appear together — never a "found N" message with no visible cards.
+    try {
+      var cards = results.map(function(item, idx) {
+        var displayTags = phraseRelevantTags(item.phrase, item.tags || [], query);
+        return '<article class="result-card" style="animation-delay:' + (idx * 20) + 'ms">' +
+          '<header class="result-header">' +
+            '<span class="result-guideline"><a href="https://lms.ehc.gov.eg/lms/mod/book/view.php?id=' + item.guidelineBookId + '" target="_blank" rel="noopener">' + escapeHtml(item.guidelineTitle) + '</a></span>' +
+          '</header>' +
+          '<p class="result-phrase">' + colorizeType(highlightText(item.phrase, query)) + '</p>' +
+          '<div class="result-tags">' +
+            displayTags.map(function(t) { return '<button type="button" class="result-tag" data-search-tag="' + escapeHtml(t) + '">' + escapeHtml(t) + '</button>'; }).join('') +
+          '</div>' +
+        '</article>';
+      }).join('');
+
+      resultsStats.innerHTML =
+        '<span>Showing ' + results.length + (results.length === 1 ? ' phrase' : ' phrases') +
+        ' containing all terms' + (prefixMatch ? ' by prefix' : '') + ': <strong>"' + escapeHtml(query) + '"</strong></span>';
+      resultsContainer.innerHTML = cards;
+    } catch (e) {
+      console.error('renderResults failed:', e);
+      resultsContainer.innerHTML = '';
+      resultsStats.innerHTML =
+        '<span>Found ' + results.length + (results.length === 1 ? ' phrase' : ' phrases') +
+        ' but could not display them. Try a shorter or more exact word.</span>';
+    }
 
     // Clicking a small result tag performs a new search for that tag word
     Array.prototype.forEach.call(resultsContainer.querySelectorAll('[data-search-tag]'), function(btn) {
@@ -230,6 +261,7 @@
   }
 
   function phraseRelevantTags(phraseText, guidelineTags, searchQuery) {
+    guidelineTags = guidelineTags || [];
     var phraseLower = phraseText.toLowerCase();
     var queryLower = (searchQuery || '').toLowerCase();
     var output = [];
