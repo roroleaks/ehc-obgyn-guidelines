@@ -21,6 +21,18 @@
   var noResults = document.getElementById('no-results');
   var searchTermDisplay = document.getElementById('search-term-display');
   var initialState = document.getElementById('initial-state');
+  var statusRegion = document.getElementById('status-region');
+  var lastAnnouncement = '';
+
+  // Single scoped live region for all search/sync status announcements, so
+  // assistive technologies never hear duplicated or stale updates.
+  function announce(msg) {
+    if (!statusRegion || !msg || msg === lastAnnouncement) return;
+    lastAnnouncement = msg;
+    statusRegion.textContent = '';
+    // Force a repaint so identical consecutive messages still re-announce.
+    statusRegion.textContent = msg;
+  }
 
   function syncTagsToggle() {
     if (!tagsToggle || !tagsSection) return;
@@ -92,26 +104,54 @@
   }
 
   function renderTags() {
-    tagsContainer.innerHTML = allTags.map(function(tag) {
+    tagsContainer.innerHTML = allTags.map(function(tag, i) {
       return '<button type="button" class="tag-btn" data-tag="' + escapeHtml(tag) +
-        '" role="option" aria-selected="false" tabindex="0">' + escapeHtml(tag) + '</button>';
+        '" aria-pressed="false" tabindex="' + (i === 0 ? '0' : '-1') + '">' + escapeHtml(tag) + '</button>';
     }).join('');
 
-    Array.prototype.forEach.call(tagsContainer.querySelectorAll('.tag-btn'), function(btn) {
+    var tbs = tagsContainer.querySelectorAll('.tag-btn');
+
+    Array.prototype.forEach.call(tbs, function(btn) {
       btn.addEventListener('click', function() { handleTagClick(btn); });
       btn.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleTagClick(btn); }
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleTagClick(btn); return; }
+        var dir = null;
+        if (e.key === 'ArrowRight' || e.key === 'ArrowDown') dir = 1;
+        else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') dir = -1;
+        else if (e.key === 'Home') dir = 0;
+        else if (e.key === 'End') dir = 2;
+        if (dir === null) return;
+        e.preventDefault();
+        moveTagFocus(btn, dir);
       });
     });
+    if (tbs.length) {
+      tbs[0].tabIndex = 0;
+    }
 
     syncTagsToggle();
+  }
+
+  function moveTagFocus(current, dir) {
+    var tbs = tagsContainer.querySelectorAll('.tag-btn');
+    if (!tbs.length) return;
+    var target;
+    if (dir === 0) { target = tbs[0]; }
+    else if (dir === 2) { target = tbs[tbs.length - 1]; }
+    else {
+      var idx = Array.prototype.indexOf.call(tbs, current);
+      target = tbs[(idx + dir + tbs.length) % tbs.length];
+    }
+    Array.prototype.forEach.call(tbs, function(b) { b.tabIndex = -1; });
+    target.tabIndex = 0;
+    target.focus();
   }
 
   function clearTagSelection() {
     selectedTag = null;
     Array.prototype.forEach.call(tagsContainer.querySelectorAll('.tag-btn'), function(b) {
       b.classList.remove('selected');
-      b.setAttribute('aria-selected', 'false');
+      b.setAttribute('aria-pressed', 'false');
     });
   }
 
@@ -121,12 +161,12 @@
 
     Array.prototype.forEach.call(tagsContainer.querySelectorAll('.tag-btn'), function(b) {
       b.classList.remove('selected');
-      b.setAttribute('aria-selected', 'false');
+      b.setAttribute('aria-pressed', 'false');
     });
 
     if (!isSelected) {
       btn.classList.add('selected');
-      btn.setAttribute('aria-selected', 'true');
+      btn.setAttribute('aria-pressed', 'true');
       selectedTag = tag;
       searchInput.value = tag;
       currentSearch = tag.toLowerCase();
@@ -141,6 +181,17 @@
     if (tagsSection) {
       tagsSection.classList.remove('tags-expanded');
       syncTagsToggle();
+    }
+
+    // Predictable focus: after a tag selection, move the user to the results
+    // heading so they immediately know where the updated results live.
+    var resultsHeading = document.getElementById('results-heading');
+    if (resultsHeading && !resultsHeading.hasAttribute('tabindex')) {
+      resultsHeading.setAttribute('tabindex', '-1');
+    }
+    if (resultsHeading) {
+      resultsHeading.focus({ preventScroll: false });
+      resultsHeading.scrollIntoView({ block: 'nearest' });
     }
   }
 
@@ -202,13 +253,20 @@
     if (results.length === 0) {
       resultsContainer.innerHTML = '';
       resultsStats.hidden = true;
+      resultsStats.textContent = '';
       noResults.hidden = false;
       searchTermDisplay.textContent = query;
+      announce('No phrases match "' + query + '". No results found.');
       return;
     }
 
     noResults.hidden = true;
     resultsStats.hidden = false;
+
+    // Clear any stale/previous content first so the old result count or cards
+    // are never left in the DOM (and never exposed to assistive tech).
+    resultsStats.textContent = '';
+    resultsContainer.innerHTML = '';
 
     // Build the full card list BEFORE updating the DOM so the count and the cards
     // always appear together — never a "found N" message with no visible cards.
@@ -217,7 +275,7 @@
         var displayTags = phraseRelevantTags(item.phrase, item.tags || [], query);
         return '<article class="result-card" style="animation-delay:' + (idx * 20) + 'ms">' +
           '<header class="result-header">' +
-            '<span class="result-guideline"><a href="https://lms.ehc.gov.eg/lms/mod/book/view.php?id=' + item.guidelineBookId + '" target="_blank" rel="noopener">' + escapeHtml(item.guidelineTitle) + '</a></span>' +
+            '<span class="result-guideline"><a href="https://lms.ehc.gov.eg/lms/mod/book/view.php?id=' + item.guidelineBookId + '" target="_blank" rel="noopener" aria-label="' + (escapeHtml(item.guidelineTitle)) + ', opens in a new tab">' + escapeHtml(item.guidelineTitle) + '<span class="visually-hidden"> (opens in a new tab)</span></a></span>' +
           '</header>' +
           '<p class="result-phrase">' + colorizeType(highlightText(item.phrase, query)) + '</p>' +
           '<div class="result-tags">' +
@@ -238,6 +296,8 @@
         ' but could not display them. Try a shorter or more exact word.</span>';
     }
 
+    announce(results.length + (results.length === 1 ? ' phrase' : ' phrases') + ' found.');
+
     // Clicking a small result tag performs a new search for that tag word
     Array.prototype.forEach.call(resultsContainer.querySelectorAll('[data-search-tag]'), function(btn) {
       btn.addEventListener('click', function() {
@@ -247,6 +307,12 @@
         clearTagSelection();
         searchInput.blur();
         performSearch();
+        // Move focus to the results heading so updated results are discoverable.
+        var resultsHeading = document.getElementById('results-heading');
+        if (resultsHeading) {
+          resultsHeading.focus({ preventScroll: false });
+          resultsHeading.scrollIntoView({ block: 'nearest' });
+        }
       });
     });
   }
@@ -363,8 +429,10 @@
   function showInitialState() {
     resultsContainer.innerHTML = '';
     resultsStats.hidden = true;
+    resultsStats.textContent = '';
     noResults.hidden = true;
     initialState.hidden = false;
+    announce('Search cleared. Showing the tag words and initial guidance.');
   }
 
   function hideInitialState() {
@@ -393,6 +461,8 @@
     syncStatusEl.textContent = msg;
     syncStatusEl.className = 'sync-status' + (cls ? ' sync-status--' + cls : '');
     syncStatusEl.hidden = false;
+    // Inform assistive technologies via the shared live region (deduplicated).
+    announce(msg);
   }
 
   // Record the moment the LMS course page was fetched AND parsed successfully.

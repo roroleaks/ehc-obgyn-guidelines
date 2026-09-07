@@ -10,6 +10,7 @@
   <meta name="apple-mobile-web-app-title" content="EHC Guidelines">
   <title>EHC Obstetric & Gynecology Guidelines Search</title>
   <meta name="description" content="Search Egyptian Health Council Obstetric and Gynecology Guidelines instantly by keyword or tag.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Ccircle%20cx='16'%20cy='16'%20r='16'%20fill='%231a5c8a'/%3E%3Ccircle%20cx='14'%20cy='14'%20r='6'%20fill='none'%20stroke='white'%20stroke-width='2.5'/%3E%3Cline%20x1='18.5'%20y1='18.5'%20x2='24'%20y2='24'%20stroke='white'%20stroke-width='2.5'%20stroke-linecap='round'/%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -18,18 +19,18 @@
 <body>
   <header class="header">
     <div class="container header-content">
-      <a href="https://lms.ehc.gov.eg/lms/course/view.php?id=38" target="_blank" rel="noopener" class="logo-link" title="View source guidelines on EHC LMS">
+      <a href="https://lms.ehc.gov.eg/lms/course/view.php?id=38" target="_blank" rel="noopener" class="logo-link" title="View source guidelines on EHC LMS" aria-label="View source guidelines on EHC LMS, opens in a new tab">
         <img src="https://lms.ehc.gov.eg/lms/pluginfile.php/1/theme_edumy/headerlogo2/1787819363/finalisa-en.png" alt="EHC Logo" class="logo" onerror="this.style.display='none'">
       </a>
       <div class="header-center">EHC Guidelines</div>
       <div class="header-info">
         <h1>Obstetric & Gynecology Guidelines</h1>
-        <p class="source-link"><a href="https://lms.ehc.gov.eg/lms/course/view.php?id=38" target="_blank" rel="noopener">Source: Egyptian Health Council LMS →</a></p>
+        <p class="source-link"><a href="https://lms.ehc.gov.eg/lms/course/view.php?id=38" target="_blank" rel="noopener">Source: Egyptian Health Council LMS <span class="visually-hidden"> (opens in a new tab)</span>→</a></p>
       </div>
     </div>
   </header>
 
-  <main class="main container">
+  <main class="main container" aria-label="Guidelines search">
     <section class="search-section" aria-labelledby="search-heading">
       <h2 id="search-heading" class="visually-hidden">Search Guidelines</h2>
       <div class="search-wrapper">
@@ -45,10 +46,10 @@
             aria-describedby="search-hint"
             spellcheck="false"
           >
-          <button id="clear-search" class="clear-btn" aria-label="Clear search" hidden>×</button>
+          <button type="button" id="clear-search" class="clear-btn" aria-label="Clear search" hidden>×</button>
         </div>
         <p id="search-hint" class="search-hint">Type a tag word below — the full recommendation phrases containing it appear instantly.</p>
-        <p id="sync-status" class="sync-status" role="status" aria-live="polite" hidden></p>
+        <p id="sync-status" class="sync-status" hidden></p>
       </div>
     </section>
 
@@ -57,13 +58,14 @@
         <h2 id="tags-heading">Tag Words</h2>
         <button type="button" id="tags-toggle" class="tags-toggle" aria-expanded="false" aria-controls="tags-container">Show tag words</button>
       </div>
-      <p class="tags-description">Click any tag to filter results instantly</p>
-      <div id="tags-container" class="tags-container" role="listbox" aria-label="Available tag words"></div>
+      <p class="tags-description" id="tags-description">Click any tag to filter results instantly. Use your arrow keys to move between tags.</p>
+      <div id="tags-container" class="tags-container" role="group" aria-labelledby="tags-heading tags-description"></div>
     </section>
 
-    <section class="results-section" aria-labelledby="results-heading" aria-live="polite">
+    <section class="results-section" aria-labelledby="results-heading">
       <h2 id="results-heading">Search Results</h2>
-      <div id="results-stats" class="results-stats" aria-live="polite" hidden></div>
+      <p id="status-region" class="visually-hidden" role="status" aria-live="polite"></p>
+      <div id="results-stats" class="results-stats" hidden></div>
       <div id="results-container" class="results-container"></div>
       <div id="no-results" class="no-results" hidden>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><path d="M21 21l-4.35-4.35"></path><path d="M8 8l6 6"></path><path d="M14 8l-6 6"></path></svg>
@@ -83,7 +85,7 @@
   <footer class="footer">
     <div class="container">
       <p>Clinical reference aid — does not replace clinical judgement.</p>
-      <p><a href="https://lms.ehc.gov.eg/lms/course/view.php?id=38" target="_blank" rel="noopener">View full guidelines on EHC LMS →</a></p>
+      <p><a href="https://lms.ehc.gov.eg/lms/course/view.php?id=38" target="_blank" rel="noopener">View full guidelines on EHC LMS <span class="visually-hidden"> (opens in a new tab)</span>→</a></p>
       <p class="copyright">© Dr. Raouf Roshdy</p>
       <p class="credit">Created by Dr. Raouf Roshdy</p>
     </div>
