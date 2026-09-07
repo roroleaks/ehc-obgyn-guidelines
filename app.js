@@ -1,6 +1,10 @@
 (function() {
   'use strict';
 
+  if (document.documentElement && document.documentElement.classList) {
+    document.documentElement.classList.add('js');
+  }
+
   var guidelinesData = null;
   var allPhrases = [];
   var allTags = [];
@@ -10,11 +14,28 @@
   var searchInput = document.getElementById('search-input');
   var clearBtn = document.getElementById('clear-search');
   var tagsContainer = document.getElementById('tags-container');
+  var tagsSection = document.getElementById('tags-section');
+  var tagsToggle = document.getElementById('tags-toggle');
   var resultsContainer = document.getElementById('results-container');
   var resultsStats = document.getElementById('results-stats');
   var noResults = document.getElementById('no-results');
   var searchTermDisplay = document.getElementById('search-term-display');
   var initialState = document.getElementById('initial-state');
+
+  function syncTagsToggle() {
+    if (!tagsToggle || !tagsSection) return;
+    var expanded = tagsSection.classList.contains('tags-expanded');
+    tagsToggle.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+    tagsToggle.textContent = expanded ? 'Hide tag words' : 'Show tag words';
+  }
+
+  if (tagsToggle) {
+    tagsToggle.addEventListener('click', function() {
+      if (!tagsSection) return;
+      tagsSection.classList.toggle('tags-expanded');
+      syncTagsToggle();
+    });
+  }
 
   function loadGuidelines() {
     fetch('guidelines.json', { cache: 'no-store' })
@@ -82,6 +103,8 @@
         if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleTagClick(btn); }
       });
     });
+
+    syncTagsToggle();
   }
 
   function clearTagSelection() {
@@ -114,6 +137,11 @@
     }
 
     performSearch();
+
+    if (tagsSection) {
+      tagsSection.classList.remove('tags-expanded');
+      syncTagsToggle();
+    }
   }
 
   function normalizeForMatch(str) {

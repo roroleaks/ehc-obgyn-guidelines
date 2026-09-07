@@ -52,8 +52,11 @@
       </div>
     </section>
 
-    <section class="tags-section" aria-labelledby="tags-heading">
-      <h2 id="tags-heading">Tag Words</h2>
+    <section class="tags-section" id="tags-section" aria-labelledby="tags-heading">
+      <div class="tags-head">
+        <h2 id="tags-heading">Tag Words</h2>
+        <button type="button" id="tags-toggle" class="tags-toggle" aria-expanded="false" aria-controls="tags-container">Show tag words</button>
+      </div>
       <p class="tags-description">Click any tag to filter results instantly</p>
       <div id="tags-container" class="tags-container" role="listbox" aria-label="Available tag words"></div>
     </section>
