@@ -60,6 +60,15 @@ const MAIN_CHECKS = `
   out.resultsSectionLive = d.querySelector('.results-section').hasAttribute('aria-live');
   out.resultsStatsLive = d.getElementById('results-stats').hasAttribute('aria-live');
 
+  // 4. provenance readable text (visible, not aria-hidden, not a second live region)
+  var prov = d.getElementById('provenance');
+  out.provHidden = prov ? prov.hidden : true;
+  out.provText = prov ? prov.textContent.trim() : '';
+  out.provAriaHidden = prov ? prov.getAttribute('aria-hidden') : null;
+  out.provHasLiveAttr = prov ? prov.hasAttribute('aria-live') : false;
+  var pSync = prov ? prov.querySelector('.provenance-sync') : null;
+  out.provSyncText = pSync ? pSync.textContent.trim() : '';
+
   // 5. tags container semantics
   var tc = d.getElementById('tags-container');
   out.tagsRole = tc.getAttribute('role');
@@ -266,6 +275,11 @@ server.listen(PORT, () => {
       ok(main.syncStatusHasRoleStatus === false, 'sync-status is not a second live region');
       ok(main.resultsSectionLive === false, 'results section not a live region');
       ok(main.resultsStatsLive === false, 'results stats not a live region');
+      ok(main.provHidden === false, 'provenance is visible on load');
+      ok(main.provText.indexOf('Guideline data current as of') !== -1, 'provenance shows readable data-date wording');
+      ok(main.provAriaHidden === null, 'provenance is not aria-hidden (screen readers read it)');
+      ok(main.provHasLiveAttr === false, 'provenance is not a second live region');
+      ok(main.provSyncText.length > 0, 'provenance sync/provenance segment readable to screen readers');
       ok(main.tagsRole === 'group', 'tag container is role=group (not listbox)');
       ok(!!main.tagsLabeledBy, 'tag group has accessible label');
       ok(main.anyTagRoleOption === false, 'no role=option on tags');

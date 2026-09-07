@@ -21,6 +21,10 @@ if (!CHROME) { console.error('Chrome/Chromium binary not found. Install Chrome o
 
 const DATA = JSON.parse(fs.readFileSync(path.join(APP, 'guidelines.json'), 'utf8'));
 
+// Expected human-readable dataset date (mirrors app.js: en-US, UTC-safe).
+const DATA_DATE = new Date(DATA.lastUpdated).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
+const CURRENT_AS_OF = 'Guideline data current as of ' + DATA_DATE;
+
 const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json; charset=utf-8' };
 const server = http.createServer((req, res) => {
   const u = req.url.split('?')[0];
@@ -148,6 +152,15 @@ server.listen(PORT, () => {
       const check = (cond, label) => { pass = ok(cond, label) && pass; return cond; };
 
       // ---- T1: initial page state (no query) ----
+      // Establish the origin, reset localStorage, then reload so T1 runs on a
+      // clean profile (the reused profile dir may carry a successful-sync
+      // timestamp from a previous run).
+      await send('Page.navigate', { url: `http://127.0.0.1:${PORT}/index.html` });
+      await sleep(1500);
+      await evalJS(ws, send, `(function(){
+        try { localStorage.clear(); } catch(e){}
+        return true;
+      })()`);
       await send('Page.navigate', { url: `http://127.0.0.1:${PORT}/index.html` });
       await sleep(3500);
       let s = await evalJS(ws, send, `(function(){
@@ -166,7 +179,9 @@ server.listen(PORT, () => {
       check(s.cards === 0, 'T1 zero result cards initially');
       check(s.tagCount > 0, 'T1 tag words rendered (' + s.tagCount + ')');
       check(s.provVisible === true && s.provText.indexOf('Source:') === 0, 'T1 provenance line visible');
-      check(s.provText.indexOf(DATA.lastUpdated) !== -1, 'T1 provenance shows dataset date ' + DATA.lastUpdated);
+      check(s.provText.indexOf(CURRENT_AS_OF) !== -1, 'T1 provenance shows formatted dataset date (' + CURRENT_AS_OF + ')');
+      check(s.provText.indexOf('Data current as of') === -1, 'T1 ambiguous "Data current as of" wording removed');
+      check(s.provText.indexOf('LMS sync unavailable \u2014 using cached data') !== -1, 'T1 cached-only provenance note (no successful sync yet): "' + s.provText + '"');
       check(s.note.indexOf('does not replace clinical judgement') !== -1, 'T1 clinical disclaimer present');
 
       // ---- T2: LMS sync SUCCESS (stubbed, returns valid listing) ----
@@ -182,6 +197,7 @@ server.listen(PORT, () => {
         var out={};
         out.cls=el.className;
         out.text=el.textContent.replace(/\\s+/g,' ').trim();
+        out.prov=document.getElementById('provenance').textContent.replace(/\\s+/g,' ').trim();
         out.input=document.getElementById('search-input').value;
         out.cards=document.querySelectorAll('.result-card').length;
         return out;
@@ -190,6 +206,16 @@ server.listen(PORT, () => {
       check(s.text.indexOf('up to date with EHC LMS') !== -1, 'T2 sync reports "up to date with EHC LMS": "' + s.text + '"');
       check(!/AbortError|TypeError|http-\d+/.test(s.text), 'T2 sync message contains no technical leak');
       check(s.input === 'preeclampsia' && s.cards > 0, 'T2 results render alongside sync success');
+      check(s.prov.indexOf(CURRENT_AS_OF) !== -1, 'T2 provenance shows the guideline data date alongside a successful sync');
+      check(s.prov.indexOf('Last LMS sync:') !== -1, 'T2 provenance distinguishes the last LMS sync time: "' + s.prov + '"');
+      check(s.prov.indexOf('Data current as of') === -1, 'T2 old ambiguous wording absent');
+      const s2 = await evalJS(ws, send, `(function(){
+        var prov = document.getElementById('provenance').textContent.replace(/\\s+/g,' ').trim();
+        var expected = null;
+        try { var raw = localStorage.getItem('ehc_last_sync_v1'); if (raw) { var d = new Date(raw); if (!isNaN(d.getTime())) expected = d.toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' }); } } catch(e){}
+        return { prov: prov, expected: expected };
+      })()`);
+      check(!!s2.expected && s2.prov.indexOf('Last LMS sync: ' + s2.expected) !== -1, 'T2 provenance sync time derived from the stored timestamp, not hardcoded');
 
       // ---- T3: LMS sync FAILURE -> cached-data fallback, cards intact ----
       await evalJS(ws, send, `(function(){
@@ -203,6 +229,7 @@ server.listen(PORT, () => {
         var out={};
         out.cls=el.className;
         out.text=el.textContent.replace(/\\s+/g,' ').trim();
+        out.prov=document.getElementById('provenance').textContent.replace(/\\s+/g,' ').trim();
         out.cards=document.querySelectorAll('.result-card').length;
         return out;
       })()`);
@@ -210,6 +237,8 @@ server.listen(PORT, () => {
       check(s.text.indexOf('Could not reach EHC LMS') !== -1 && s.text.indexOf('locally stored copy') !== -1,
         'T3 failover message: "' + s.text + '"');
       check(s.cards > 0, 'T3 cached local data still renders cards');
+      check(s.prov.indexOf(CURRENT_AS_OF) !== -1, 'T3 guideline data date remains visible in the cached fallback');
+      check(s.prov.indexOf('Last LMS sync:') !== -1, 'T3 provenance shows the last known successful sync after failure: "' + s.prov + '"');
 
       // ---- T4: stale live-region messaging is overwritten by search ----
       await evalJS(ws, send, `(function(){

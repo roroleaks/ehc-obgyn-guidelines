@@ -57,6 +57,11 @@ async function runWidth(iframe){
   var tog=cdw.querySelector('#tags-toggle'),tc=cdw.querySelector('#tags-container');
   out.toggleVisible=!!(tog&&cdw.defaultView.getComputedStyle(tog).display!=='none');
   out.tagsCollapsedInitial=!!(tc&&parseFloat(cdw.defaultView.getComputedStyle(tc).maxHeight)===0);
+  var prov=cdw.getElementById('provenance');
+  out.provVisible=!!(prov&&!prov.hidden);
+  out.provOverflow=prov?(prov.scrollWidth>prov.clientWidth+1):null;
+  out.provScrollW=prov?prov.scrollWidth:null;
+  out.provClientW=prov?prov.clientWidth:null;
   var btn=cdw.querySelector('.tag-btn');
   out.tagBtnH=btn?Math.round(btn.getBoundingClientRect().height):null;
   var si=cdw.getElementById('search-input'),cb=cdw.getElementById('clear-search');
@@ -153,6 +158,7 @@ server.listen(PORT, () => {
         const problems = [];
         if (r.error) problems.push('LOAD ERROR ' + r.error);
         if (!r.noHOverflow) problems.push('HORIZONTAL OVERFLOW scrollW=' + r.scrollW + ' clientW=' + r.clientW);
+        if (r.provVisible === true && r.provOverflow === true) problems.push('provenance overflows at ' + r.width + ' (scrollW=' + r.provScrollW + ' clientW=' + r.provClientW + ')');
         if (!r.headerInfoBelowTitle && r.width <= 640) problems.push('source row not below title row');
         if (r.width === 320 && r.h1Clipped) problems.push('h1 clipped at 320');
         if (r.toggleVisible !== true && r.width <= 640) problems.push('tags toggle not visible');

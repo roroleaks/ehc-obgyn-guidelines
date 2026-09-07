@@ -105,8 +105,19 @@
       });
   }
 
+  // Human-readable "guideline data" date (e.g. "Sep 6, 2026"), derived from the
+  // dataset metadata's lastUpdated value — never hardcoded. Date-only values
+  // parse as UTC, so the displayed day never shifts across browser locations.
+  function formatDataDate(isoDate) {
+    if (!isoDate) return null;
+    var d = new Date(isoDate);
+    if (isNaN(d.getTime())) return String(isoDate);
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
+  }
+
   // A concise provenance line sits above the results (not just in the footer).
-  // Built from the local dataset metadata only; nothing is invented or implied.
+  // The guideline-data date and the live-sync state are separate facts and are
+  // labeled separately so the two dates never read as a single ambiguous value.
   function populateProvenance() {
     if (!provenanceEl || !guidelinesData) return;
     var html = 'Source: ';
@@ -117,11 +128,16 @@
     } else {
       html += escapeHtml(String(guidelinesData.source || 'Source'));
     }
-    if (guidelinesData.lastUpdated) {
-      html += ' <span class="provenance-date">\u00b7 Data current as of ' + escapeHtml(String(guidelinesData.lastUpdated)) + '</span>';
+    var dataDate = formatDataDate(guidelinesData.lastUpdated);
+    if (dataDate) {
+      html += ' <span class="provenance-date">\u00b7 Guideline data current as of ' + escapeHtml(String(dataDate)) + '</span>';
     }
+    html += ' <span class="provenance-sync"></span>';
     provenanceEl.innerHTML = html;
     provenanceEl.hidden = false;
+    // Until live synchronization settles, only the guideline data date is shown
+    // (no possibly-misleading sync timestamp).
+    setProvenanceSync('pending');
   }
 
   function processData() {
@@ -679,6 +695,9 @@
     syncStatusEl.textContent = msg;
     syncStatusEl.className = 'sync-status' + (cls ? ' sync-status--' + cls : '');
     syncStatusEl.hidden = false;
+    // Keep the provenance line's sync segment in step (text only — it is never
+    // announced, so the single live region below stays the only announcement).
+    setProvenanceSync(cls);
     // Inform assistive technologies via the shared live region (deduplicated).
     announce(msg);
   }
@@ -690,16 +709,43 @@
     } catch (e) { /* localStorage unavailable */ }
   }
 
-  // Human-readable "last successful sync" label, or null when none exists.
-  function lastSyncLabel() {
+  // Human-readable "last successful sync" time only (e.g. "Sep 7, 2026, 1:58 PM"),
+  // derived from the stored sync timestamp — never hardcoded. Returns null when
+  // no valid successful sync exists yet.
+  function lastSyncTimeText() {
     try {
       var raw = localStorage.getItem(LAST_SYNC_KEY);
       if (!raw) return null;
       var d = new Date(raw);
       if (isNaN(d.getTime())) return null;
-      return 'Last successful sync: ' +
-        d.toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
+      return d.toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' });
     } catch (e) { return null; }
+  }
+
+  // Human-readable "last successful sync" label, or null when none exists.
+  function lastSyncLabel() {
+    var t = lastSyncTimeText();
+    return t ? 'Last successful sync: ' + t : null;
+  }
+
+  // The provenance line mirrors the sync-status state without duplicating the
+  // full status sentence: pending until the first sync settles, then the last
+  // sync time (success, or a cached fallback that synced before), or a clear
+  // unavailable note when no successful sync has ever completed.
+  function provenanceSyncSuffix(cls) {
+    var t = (cls === 'ok' || cls === 'error') ? lastSyncTimeText() : null;
+    if (cls === 'error' && !t) return 'LMS sync unavailable \u2014 using cached data';
+    return t ? 'Last LMS sync: ' + t : 'LMS sync pending';
+  }
+
+  // Updates the readable sync segment inside the provenance line (textContent
+  // only, so no nested markup and no second live announcement).
+  function setProvenanceSync(cls) {
+    if (!provenanceEl) return;
+    var span = provenanceEl.querySelector('.provenance-sync');
+    if (!span) return;
+    var suffix = provenanceSyncSuffix(cls);
+    span.textContent = '\u00b7 ' + suffix;
   }
 
   // fetch with a hard timeout so a slow or blocked LMS never hangs the UI.

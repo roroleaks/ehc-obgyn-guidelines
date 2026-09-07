@@ -31,14 +31,30 @@ const LAST_SYNC_KEY = 'ehc_last_sync_v1';
 function saveLastSync() {
   try { localStorage.setItem(LAST_SYNC_KEY, new Date().toISOString()); } catch (e) {}
 }
-function lastSyncLabel() {
+function lastSyncTimeText() {
   try {
     var raw = localStorage.getItem(LAST_SYNC_KEY);
     if (!raw) return null;
     var d = new Date(raw);
     if (isNaN(d.getTime())) return null;
-    return 'Last successful sync: ' + d.toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
+    return d.toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' });
   } catch (e) { return null; }
+}
+function lastSyncLabel() {
+  var t = lastSyncTimeText();
+  return t ? 'Last successful sync: ' + t : null;
+}
+// Mirrors app.js provenance rendering: pending until the first sync settles.
+function formatDataDate(isoDate) {
+  if (!isoDate) return null;
+  var d = new Date(isoDate);
+  if (isNaN(d.getTime())) return String(isoDate);
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
+}
+function provenanceSyncSuffix(cls) {
+  var t = (cls === 'ok' || cls === 'error') ? lastSyncTimeText() : null;
+  if (cls === 'error' && !t) return 'LMS sync unavailable \u2014 using cached data';
+  return t ? 'Last LMS sync: ' + t : 'LMS sync pending';
 }
 
 // Mirrors the app's success rule: a sync only counts when the parsed listing
@@ -105,13 +121,36 @@ assert(successfulSync(undefined) === false, 'unparseable content -> NOT a succes
 
 // ---- Test 5: lastSync persistence and label formatting ----
 assert(lastSyncLabel() === null, 'no stored sync -> no label');
+assert(lastSyncTimeText() === null, 'no stored sync -> no sync time text');
 store[LAST_SYNC_KEY] = 'not-a-date';
 assert(lastSyncLabel() === null, 'corrupt stored value -> no label');
+assert(lastSyncTimeText() === null, 'corrupt stored value -> no sync time text');
 delete store[LAST_SYNC_KEY];
 saveLastSync();
 assert(store[LAST_SYNC_KEY] !== null, 'successful sync stores an ISO timestamp');
+const timeText = lastSyncTimeText();
 const label = lastSyncLabel();
+assert(typeof timeText === 'string' && timeText.length > 5 && timeText.indexOf('Last successful sync:') === -1, 'sync time text is a plain readable timestamp', timeText);
 assert(typeof label === 'string' && label.indexOf('Last successful sync: ') === 0 && label.length > 22, 'label is human-readable text', label);
+
+// ---- Test 5b: deterministic readable date formatting (en-US, UTC-safe) ----
+assert(formatDataDate('2026-09-06') === 'Sep 6, 2026', 'data date formats as "Sep 6, 2026" (' + formatDataDate('2026-09-06') + ')');
+assert(formatDataDate(undefined) === null, 'missing data date -> null');
+assert(formatDataDate('') === null, 'empty data date -> null');
+assert(formatDataDate('garbage') === 'garbage', 'unparseable data date falls back to the raw text');
+
+// ---- Test 5c: provenance sync segment states ----
+store[LAST_SYNC_KEY] = '2026-09-07T13:58:00.000Z';
+const known = lastSyncTimeText();
+assert(/^[A-Z][a-z]{2} \d{1,2}, \d{4}, \d{1,2}:\d{2} (AM|PM)$/.test(known), 'stored sync formats readably (' + known + ')');
+assert(provenanceSyncSuffix('pending') === 'LMS sync pending', 'pending -> no timestamp');
+assert(provenanceSyncSuffix('syncing') === 'LMS sync pending', 'syncing -> no timestamp');
+assert(provenanceSyncSuffix('ok') === 'Last LMS sync: ' + known, 'ok -> last sync time shown');
+assert(provenanceSyncSuffix('error') === 'Last LMS sync: ' + known, 'error -> last known sync time shown');
+delete store[LAST_SYNC_KEY];
+assert(provenanceSyncSuffix('ok') === 'LMS sync pending', 'ok without any stored sync -> pending');
+assert(provenanceSyncSuffix('error') === 'LMS sync unavailable \u2014 using cached data', 'error without any stored sync -> unavailable fallback');
+assert(provenanceSyncSuffix(undefined) === 'LMS sync pending', 'unknown state -> pending');
 
 // ---- Test 6: no technical details leak into user-facing messages ----
 const fs = require('fs');

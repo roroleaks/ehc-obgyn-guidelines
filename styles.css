@@ -364,6 +364,11 @@ img { max-width: 100%; height: auto; display: block; }
 .provenance { font-size: 0.8125rem; color: var(--color-text-muted); margin-bottom: 0.625rem; }
 .provenance a { color: var(--color-primary); text-decoration: underline; }
 .provenance a:hover { color: var(--color-primary-dark); }
+/* The data-date and live-sync segments wrap as whole units on small screens
+   (no mid-phrase breaks, no horizontal overflow) and line up on one row on
+   wide screens. */
+.provenance .provenance-date,
+.provenance .provenance-sync { display: inline-block; white-space: nowrap; }
 .clinical-note {
   font-size: 0.8125rem;
   color: var(--color-text-muted);

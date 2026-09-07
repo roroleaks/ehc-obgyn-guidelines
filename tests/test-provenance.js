@@ -19,10 +19,22 @@ if (!CHROME) { console.error('Chrome/Chromium binary not found. Install Chrome o
 const DATA = JSON.parse(fs.readFileSync(path.join(APP, 'guidelines.json'), 'utf8'));
 const SOURCE = DATA.source;
 const SOURCE_URL = DATA.sourceUrl;
-const LAST_UPDATED = DATA.lastUpdated;
 
 // Expected recommendation-strength labels seen in the local dataset
 const EXPECTED_STRENGTH_KEYS = ['strong', 'gps', 'conditional', 'weak', 'other'];
+
+// Expected human-readable dates derived from the dataset (mirrors app.js).
+const DATA_DATE = new Date(DATA.lastUpdated).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
+const CURRENT_AS_OF = 'Guideline data current as of ' + DATA_DATE;
+
+// HTML for a simulated successful LMS course listing with book links.
+function lmsSuccessHtml() {
+  return '<!DOCTYPE html><html><body>' +
+    DATA.guidelines.map(function (g) {
+      return '<a href="https://lms.ehc.gov.eg/lms/mod/book/view.php?id=' + g.bookId + '">' + g.title + ' Book</a>';
+    }).join('\n') +
+    '</body></html>';
+}
 
 const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json; charset=utf-8' };
 const server = http.createServer((req, res) => {
@@ -83,6 +95,13 @@ server.listen(PORT, () => {
           window.fetch = function(url){
             var u = String(url);
             if (u.indexOf('lms.ehc.gov.eg') !== -1) {
+              var mode = 'off', html = '';
+              try { mode = localStorage.getItem('__ehc_lms_mode') || 'off'; } catch(e){}
+              try { html = localStorage.getItem('__ehc_lms_html') || ''; } catch(e){}
+              if (mode === 'hang') { return new Promise(function(){}); }
+              if (mode === 'success') {
+                return Promise.resolve({ ok: true, status: 200, text: function(){ return Promise.resolve(html); } });
+              }
               return Promise.resolve({ ok:false, status:503, json:function(){ return Promise.resolve({}); }, text:function(){ return Promise.resolve(''); } });
             }
             return orig.apply(window, arguments);
@@ -90,6 +109,15 @@ server.listen(PORT, () => {
         })();
       ` });
       // Reload so the new-document fetch stub applies (it only runs on future navigations).
+      // First load establishes the origin so localStorage can be reset; the second
+      // load runs assertions on a clean profile (the profile dir is reused across
+      // runs and could otherwise carry a successful-sync timestamp).
+      await send('Page.navigate', { url: 'http://127.0.0.1:' + PORT + '/index.html' });
+      await sleep(1500);
+      await evalJS(ws, send, `(function(){
+        try { localStorage.clear(); } catch(e){}
+        return true;
+      })()`);
       await send('Page.navigate', { url: 'http://127.0.0.1:' + PORT + '/index.html' });
       await sleep(3000); // let guidelines.json + provenance finish loading before the first assertion
 
@@ -109,6 +137,8 @@ server.listen(PORT, () => {
         out.provHref = out.provLink ? out.provLink.getAttribute('href') : '';
         out.provRel = out.provLink ? out.provLink.getAttribute('rel') : '';
         out.provTarget = out.provLink ? out.provLink.getAttribute('target') : '';
+        out.syncText = document.getElementById('sync-status') ? document.getElementById('sync-status').textContent.replace(/\\s+/g,' ').trim() : '';
+        out.syncCls = document.getElementById('sync-status') ? document.getElementById('sync-status').className : '';
         return out;
       })()`);
       check(s.copyLink && s.printBtn, 'T1 toolbar controls present (copy link + print)');
@@ -119,7 +149,95 @@ server.listen(PORT, () => {
       check(s.provHref === SOURCE_URL, 'T1 provenance source href correct: ' + s.provHref);
       check(s.provRel === 'noopener', 'T1 provenance link rel=noopener');
       check(s.provTarget === '_blank', 'T1 provenance link target=_blank');
-      check(s.provText.indexOf('Data current as of ' + LAST_UPDATED) !== -1, 'T1 provenance shows dataset last-updated ' + LAST_UPDATED);
+      check(s.provText.indexOf(CURRENT_AS_OF) !== -1, 'T1 provenance shows the formatted dataset date (' + CURRENT_AS_OF + ')');
+      check(s.provText.indexOf('Data current as of') === -1, 'T1 ambiguous "Data current as of" wording removed');
+      check(s.provText.indexOf('LMS sync unavailable \u2014 using cached data') !== -1, 'T1 cached-data fallback wording shown (no successful sync yet): "' + s.provText + '"');
+      check(s.provText.indexOf('Last LMS sync:') === -1, 'T1 no sync timestamp before a successful sync');
+      check(s.syncCls.indexOf('sync-status--error') !== -1, 'T1 blocked-LMS sync reached error state — got "' + s.syncCls + '"');
+
+      // ---- T1a: no misleading "last sync" before the first sync completes ----
+      await evalJS(ws, send, `(function(){
+        localStorage.setItem('__ehc_lms_mode', 'hang');
+        return true;
+      })()`);
+      await send('Page.navigate', { url: 'http://127.0.0.1:' + PORT + '/index.html' });
+      // Poll for the reload to reach the in-flight sync state (fixed sleeps race
+      // document startup on slower CI machines).
+      s = null;
+      for (let i = 0; i < 40; i++) {
+        s = await evalJS(ws, send, `(function(){
+          var ss = document.getElementById('sync-status');
+          var prov = document.getElementById('provenance');
+          return {
+            cls: ss ? ss.className : '',
+            hidden: ss ? ss.hidden : true,
+            prov: prov ? prov.textContent.replace(/\\s+/g,' ').trim() : '',
+            sync: ss ? ss.textContent.replace(/\\s+/g,' ').trim() : ''
+          };
+        })()`);
+        if (s && s.cls.indexOf('sync-status--syncing') !== -1) break;
+        await sleep(250);
+      } // well inside the 12s LMS timeout, so the sync is still in flight
+      check(s && s.cls.indexOf('sync-status--syncing') !== -1, 'T1a live sync is still checking — got "' + (s ? s.cls : 'none') + '"');
+      check(s.prov.indexOf('LMS sync pending') !== -1, 'T1a provenance shows "LMS sync pending" while checking');
+      check(s.prov.indexOf(CURRENT_AS_OF) !== -1, 'T1a guideline data date still shown while pending');
+      check(s.prov.indexOf('Last LMS sync:') === -1, 'T1a no sync timestamp shown while pending');
+      check(s.sync.indexOf('Last successful sync:') === -1, 'T1a status has no last-sync claim while pending');
+
+      // ---- T1b: successful live sync shows both dates, clearly distinguished ----
+      await evalJS(ws, send, `(function(){
+        localStorage.setItem('__ehc_lms_mode', 'success');
+        localStorage.setItem('__ehc_lms_html', ` + JSON.stringify(lmsSuccessHtml()) + `);
+        return true;
+      })()`);
+      await send('Page.navigate', { url: 'http://127.0.0.1:' + PORT + '/index.html' });
+      await sleep(4000);
+      s = await evalJS(ws, send, `(function(){
+        var ss = document.getElementById('sync-status');
+        var prov = document.getElementById('provenance');
+        var raw = null, expected = null;
+        try { raw = localStorage.getItem('ehc_last_sync_v1'); } catch(e){}
+        if (raw) { var d = new Date(raw); if (!isNaN(d.getTime())) expected = d.toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' }); }
+        return {
+          prov: prov.textContent.replace(/\\s+/g,' ').trim(),
+          sync: ss.textContent.replace(/\\s+/g,' ').trim(),
+          cls: ss.className,
+          storedSync: raw,
+          expectedSync: expected
+        };
+      })()`);
+      check(s.cls.indexOf('sync-status--ok') !== -1, 'T1b sync reached success state (--ok) — got "' + s.cls + '"');
+      check(s.prov.indexOf(CURRENT_AS_OF) !== -1, 'T1b guideline data date shown after a successful sync');
+      check(!!s.storedSync && !!s.expectedSync, 'T1b a successful sync timestamp was stored (' + (s.storedSync || 'none') + ')');
+      check(s.prov.indexOf('Last LMS sync: ' + s.expectedSync) !== -1, 'T1b provenance shows the derived last-sync time (not hardcoded): "' + s.prov + '"');
+      check(s.prov.indexOf('Data current as of') === -1, 'T1b old ambiguous wording absent after success');
+      check(s.sync.indexOf('up to date with EHC LMS') !== -1, 'T1b success status message preserved: "' + s.sync + '"');
+      check(s.sync.indexOf('Last successful sync: ' + s.expectedSync) !== -1, 'T1b status still shows its own last-sync line');
+
+      // ---- T1c: failed sync AFTER a success keeps data date + last known sync ----
+      await evalJS(ws, send, `(function(){
+        localStorage.setItem('__ehc_lms_mode', 'fail');
+        return true;
+      })()`);
+      await send('Page.navigate', { url: 'http://127.0.0.1:' + PORT + '/index.html' });
+      await sleep(4000);
+      s = await evalJS(ws, send, `(function(){
+        var ss = document.getElementById('sync-status');
+        var prov = document.getElementById('provenance');
+        var expected = null;
+        try { var raw = localStorage.getItem('ehc_last_sync_v1'); if (raw) { var d = new Date(raw); if (!isNaN(d.getTime())) expected = d.toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' }); } } catch(e){}
+        return {
+          prov: prov.textContent.replace(/\\s+/g,' ').trim(),
+          sync: ss.textContent.replace(/\\s+/g,' ').trim(),
+          cls: ss.className,
+          expectedSync: expected
+        };
+      })()`);
+      check(s.cls.indexOf('sync-status--error') !== -1, 'T1c sync failure marked error (--error)');
+      check(s.prov.indexOf(CURRENT_AS_OF) !== -1, 'T1c guideline data date still visible on the cached fallback');
+      check(!!s.expectedSync && s.prov.indexOf('Last LMS sync: ' + s.expectedSync) !== -1, 'T1c provenance shows the last known successful sync');
+      check(s.expectedSync !== null && s.prov.indexOf('LMS sync unavailable') === -1, 'T1c fallback keeps the known sync time (not the never-synced note)');
+      check(s.sync.indexOf('Could not reach EHC LMS') !== -1 && s.sync.indexOf('locally stored copy') !== -1, 'T1c failover status message preserved');
 
       // ---- T2: successful search with many results + per-card provenance ----
       await evalJS(ws, send, `(function(){
