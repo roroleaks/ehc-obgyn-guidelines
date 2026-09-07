@@ -354,10 +354,52 @@
   var LMS_COURSE_URL = 'https://lms.ehc.gov.eg/lms/course/view.php?id=38';
   var AUTO_CACHE_KEY = 'ehc_auto_guidelines_v1';
   var AUTO_TAGS_KEY = 'ehc_auto_tags_v1';
+  var LAST_SYNC_KEY = 'ehc_last_sync_v1';
+  var LMS_TIMEOUT_MS = 12000;
   var syncStatusEl = document.getElementById('sync-status');
+  var syncInProgress = false;
 
-  function setSyncStatus(msg) {
-    if (syncStatusEl) { syncStatusEl.textContent = msg; syncStatusEl.hidden = false; }
+  // cls is one of: 'syncing', 'ok', 'error' — drives the status dot color.
+  function setSyncStatus(msg, cls) {
+    if (!syncStatusEl) return;
+    syncStatusEl.textContent = msg;
+    syncStatusEl.className = 'sync-status' + (cls ? ' sync-status--' + cls : '');
+    syncStatusEl.hidden = false;
+  }
+
+  // Record the moment the LMS course page was fetched AND parsed successfully.
+  function saveLastSync() {
+    try {
+      localStorage.setItem(LAST_SYNC_KEY, new Date().toISOString());
+    } catch (e) { /* localStorage unavailable */ }
+  }
+
+  // Human-readable "last successful sync" label, or null when none exists.
+  function lastSyncLabel() {
+    try {
+      var raw = localStorage.getItem(LAST_SYNC_KEY);
+      if (!raw) return null;
+      var d = new Date(raw);
+      if (isNaN(d.getTime())) return null;
+      return 'Last successful sync: ' +
+        d.toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
+    } catch (e) { return null; }
+  }
+
+  // fetch with a hard timeout so a slow or blocked LMS never hangs the UI.
+  function fetchWithTimeout(url, ms) {
+    if (typeof AbortController !== 'undefined') {
+      var controller = new AbortController();
+      var timer = setTimeout(function() { controller.abort(); }, ms);
+      return fetch(url, { signal: controller.signal }).then(function(res) {
+        clearTimeout(timer);
+        return res;
+      }, function(err) {
+        clearTimeout(timer);
+        throw err;
+      });
+    }
+    return fetch(url);
   }
 
   function mergeCachedAutoBooks() {
@@ -421,10 +463,15 @@
   }
 
   function syncWithLms() {
-    setSyncStatus('Checking EHC LMS for new guidelines...');
-    fetch(LMS_COURSE_URL)
+    if (!guidelinesData) return;
+    if (syncInProgress) return;
+
+    setSyncStatus('Checking EHC LMS for new guidelines…', 'syncing');
+    syncInProgress = true;
+
+    fetchWithTimeout(LMS_COURSE_URL, LMS_TIMEOUT_MS)
       .then(function(res) {
-        if (!res.ok) throw new Error('HTTP ' + res.status);
+        if (!res.ok) throw new Error('http-' + res.status);
         return res.text();
       })
       .then(function(html) {
@@ -444,6 +491,14 @@
           order.push(id);
         });
 
+        // Only a response with real guideline links counts as a successful sync.
+        // A blank, blocked, or unparsed response must fall straight into the
+        // cached-data path below and must never be reported as "up to date".
+        if (!order.length) throw new Error('empty');
+
+        saveLastSync();
+        var syncTime = lastSyncLabel();
+
         var existing = {};
         guidelinesData.guidelines.forEach(function(g) { existing[String(g.bookId)] = true; });
 
@@ -452,25 +507,46 @@
           if (!existing[id]) additions.push(books[id]);
         });
 
-        if (!additions.length) {
-          setSyncStatus('Up to date with EHC LMS (' + order.length + ' guidelines).');
+        if (additions.length) {
+          setSyncStatus('Found ' + additions.length + ' new guideline(s) on EHC LMS. Importing…', 'syncing');
+          ingestBooks(additions, 0, syncTime);
           return;
         }
 
-        setSyncStatus('Found ' + additions.length + ' new guideline(s) on EHC LMS. Ingesting...');
-        ingestBooks(additions, 0);
+        // Request completed and parsed successfully -> only now is "up to date" truthful.
+        syncInProgress = false;
+        setSyncStatus(
+          'Live sync succeeded — up to date with EHC LMS (' + order.length + ' guidelines).' +
+          (syncTime ? ' ' + syncTime + '.' : ''),
+          'ok'
+        );
       })
       .catch(function(err) {
-        console.error('LMS sync failed:', err);
-        setSyncStatus('Live sync unavailable — app continues with the stored guidelines.');
+        // A failed sync never touches or clears the locally stored guidelines.
+        syncInProgress = false;
+        console.error('LMS sync failed:', err && err.message ? err.message : err);
+        var label = lastSyncLabel();
+        setSyncStatus(
+          'Could not reach EHC LMS — showing the locally stored copy of the guidelines.' +
+          (label ? ' ' + label + '.' : ''),
+          'error'
+        );
       });
   }
 
-  function ingestBooks(books, i) {
+  function ingestBooks(books, i, syncTime, skipped) {
+    skipped = skipped || 0;
     if (i >= books.length) {
-      setSyncStatus('All new guidelines ingested and indexed. New tag words were added to the search library.');
+      syncInProgress = false;
+      var added = books.length - skipped;
+      var msg = 'Sync completed — ' + added + ' new guideline(s) added and indexed.';
+      if (skipped > 0) {
+        msg = 'Sync completed — added ' + added + ' of ' + books.length + ' guideline(s).';
+      }
+      setSyncStatus(msg + (syncTime ? ' ' + syncTime + '.' : ''), 'ok');
       return;
     }
+    setSyncStatus('Importing "' + books[i].title + '" (' + (i + 1) + '/' + books.length + ')…', 'syncing');
     ingestBook(books[i]).then(function(created) {
       if (created) {
         guidelinesData.guidelines.push(created);
@@ -478,19 +554,20 @@
         processData();
         renderTags();
         if (currentSearch) performSearch();
-        setSyncStatus('Ingested "' + created.title + '" (' + (i + 1) + '/' + books.length + ')' +
-          (created.newTags && created.newTags.length ? ' — ' + created.newTags.length + ' new tag(s) added to the search library.' : '.'));
       } else {
-        setSyncStatus('Could not read "' + books[i].title + '" contents; skipped.');
+        skipped += 1;
       }
-      ingestBooks(books, i + 1);
+      ingestBooks(books, i + 1, syncTime, skipped);
     });
   }
 
   function ingestBook(meta) {
     var bookId = meta.bookId;
-    return fetch('https://lms.ehc.gov.eg/lms/mod/book/view.php?id=' + bookId)
-      .then(function(res) { return res.text(); })
+    return fetchWithTimeout('https://lms.ehc.gov.eg/lms/mod/book/view.php?id=' + bookId, LMS_TIMEOUT_MS)
+      .then(function(res) {
+        if (!res.ok) throw new Error('http-' + res.status);
+        return res.text();
+      })
       .then(function(html) {
         var doc = new DOMParser().parseFromString(html, 'text/html');
         var chapterIds = [];
@@ -524,8 +601,11 @@
         var chain = Promise.resolve([]);
         queue.forEach(function(cid) {
           chain = chain.then(function(all) {
-            return fetch('https://lms.ehc.gov.eg/lms/mod/book/view.php?id=' + bookId + '&chapterid=' + cid)
-              .then(function(res) { return res.text(); })
+            return fetchWithTimeout('https://lms.ehc.gov.eg/lms/mod/book/view.php?id=' + bookId + '&chapterid=' + cid, LMS_TIMEOUT_MS)
+              .then(function(res) {
+                if (!res.ok) throw new Error('http-' + res.status);
+                return res.text();
+              })
               .then(function(html2) {
                 var doc2 = new DOMParser().parseFromString(html2, 'text/html');
                 var content = doc2.getElementById('mod_book-chapter') || doc2.querySelector('.book_content');
