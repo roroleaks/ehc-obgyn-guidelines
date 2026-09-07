@@ -34,6 +34,10 @@
   var statusRegion = document.getElementById('status-region');
   var searchHelpToggle = document.getElementById('search-help-toggle');
   var searchHelpPanel = document.getElementById('search-help');
+  var provenanceEl = document.getElementById('provenance');
+  var toolbarFeedback = document.getElementById('toolbar-feedback');
+  var copySearchLinkBtn = document.getElementById('copy-search-link');
+  var printBtn = document.getElementById('print-results');
   var lastAnnouncement = '';
 
   // Single scoped live region for all search/sync status announcements, so
@@ -81,6 +85,7 @@
         processData();
         renderTags();
         mergeCachedAutoBooks();
+        populateProvenance();
         syncWithLms();
         // Restore query from URL (?q=...) on initial load
         var urlQuery = readQueryFromUrl();
@@ -98,6 +103,25 @@
           '<div class="no-results" style="text-align:center;padding:2rem;color:var(--color-text-muted)">' +
           '<p>Failed to load guidelines data. Please refresh or <a href="https://lms.ehc.gov.eg/lms/course/view.php?id=38" target="_blank" rel="noopener">view on EHC LMS</a>.</p></div>';
       });
+  }
+
+  // A concise provenance line sits above the results (not just in the footer).
+  // Built from the local dataset metadata only; nothing is invented or implied.
+  function populateProvenance() {
+    if (!provenanceEl || !guidelinesData) return;
+    var html = 'Source: ';
+    if (guidelinesData.sourceUrl) {
+      html += '<a href="' + escapeHtml(guidelinesData.sourceUrl) + '" target="_blank" rel="noopener">' +
+        escapeHtml(String(guidelinesData.source || 'Source')) +
+        '<span class="visually-hidden"> (opens in a new tab)</span></a>';
+    } else {
+      html += escapeHtml(String(guidelinesData.source || 'Source'));
+    }
+    if (guidelinesData.lastUpdated) {
+      html += ' <span class="provenance-date">\u00b7 Data current as of ' + escapeHtml(String(guidelinesData.lastUpdated)) + '</span>';
+    }
+    provenanceEl.innerHTML = html;
+    provenanceEl.hidden = false;
   }
 
   function processData() {
@@ -427,14 +451,19 @@
 
     try {
       var cards = results.map(function(item, idx) {
+        var strength = detectStrength(item.phrase);
         var displayTags = phraseRelevantTags(item.phrase, item.tags || [], query);
-        return '<article class="result-card" style="animation-delay:' + (idx * 20) + 'ms">' +
+        return '<article class="result-card" data-book-id="' + item.guidelineBookId + '" style="animation-delay:' + (idx * 20) + 'ms">' +
           '<header class="result-header">' +
             '<span class="result-guideline"><a href="https://lms.ehc.gov.eg/lms/mod/book/view.php?id=' + item.guidelineBookId + '" target="_blank" rel="noopener" aria-label="' + (escapeHtml(item.guidelineTitle)) + ', opens in a new tab">' + escapeHtml(item.guidelineTitle) + '<span class="visually-hidden"> (opens in a new tab)</span></a></span>' +
+            '<span class="result-book-meta">Book ' + item.guidelineBookId + '</span>' +
           '</header>' +
-          '<p class="result-phrase">' + colorizeType(highlightText(item.phrase, query)) + '</p>' +
+          '<p class="result-phrase">' + colorizeType(highlightText(item.phrase, query), strength) + '</p>' +
           '<div class="result-tags">' +
             displayTags.map(function(t) { return '<button type="button" class="result-tag" data-search-tag="' + escapeHtml(t) + '">' + escapeHtml(t) + '</button>'; }).join('') +
+          '</div>' +
+          '<div class="result-actions">' +
+            '<button type="button" class="copy-btn" data-copy-label="Copy" data-copy-text="' + escapeHtml(item.phrase) + '" title="Copy recommendation text">Copy</button>' +
           '</div>' +
         '</article>';
       }).join('');
@@ -454,6 +483,7 @@
         ' for "' + query + '"' + prefixNote + allTermsNote + breakdown + '.';
       resultsStats.textContent = statsText;
       resultsContainer.innerHTML = cards;
+      bindCopyButtons();
     } catch (e) {
       console.error('renderResults failed:', e);
       resultsContainer.innerHTML = '';
@@ -513,9 +543,33 @@
     return escaped.replace(regex, '<mark>$1</mark>');
   }
 
-  function colorizeType(html) {
+  // Recognizes a trailing recommendation strength/type annotation in the SOURCE
+  // phrase text, e.g. "(Strong)", "(GPS)", "(Conditional)", "(Recommended,
+  // High-certainty evidence)". The pill keeps the original wording — only an
+  // accessible label and per-strength styling are added.
+  function detectStrength(phrase) {
+    var m = String(phrase).trim().match(/\(([^()]*)\)\s*\.?$/);
+    if (!m) return null;
+    var label = m[1].trim();
+    if (!/strong|conditional|\bgps\b|weak|certainty|evidence|recommendation|practice/i.test(label)) return null;
+    var lower = label.toLowerCase();
+    var key = 'other';
+    if (lower.indexOf('strong') !== -1 || lower.indexOf('high-certainty') !== -1) key = 'strong';
+    else if (/\bgps\b/.test(lower) || lower.indexOf('good practice') !== -1) key = 'gps';
+    else if (lower.indexOf('conditional') !== -1 || lower.indexOf('context-specific') !== -1) key = 'conditional';
+    else if (lower.indexOf('weak') !== -1 || lower.indexOf('very low') !== -1) key = 'weak';
+    return { label: label, key: key };
+  }
+
+  function colorizeType(html, strength) {
     // Style the trailing recommendation type, e.g. "(Conditional)", "(Strong)", "(GPS)"
-    return html.replace(/\(([^()]*)\)(\s*\.?)$/, '<span class="phrase-type">($1)</span>$2');
+    if (!strength) {
+      return html.replace(/\(([^()]*)\)(\s*\.?)$/, '<span class="phrase-type">($1)</span>$2');
+    }
+    var attrs = 'class="phrase-type strength--' + strength.key + '"' +
+      ' data-strength="' + strength.key + '"' +
+      ' aria-label="Recommendation strength: ' + escapeHtml(strength.label) + '"';
+    return html.replace(/\(([^()]*)\)(\s*\.?)$/, '<span ' + attrs + '>($1)</span>$2');
   }
 
   function phraseRelevantTags(phraseText, guidelineTags, searchQuery) {
@@ -1179,6 +1233,101 @@
       showInitialState();
     }
   });
+
+  // ---- Clinician workflow controls: copy, share, print ----
+
+  // Copy helpers with a safe fallback for environments without the async
+  // Clipboard API or where a permissions prompt rejects the write.
+  function copyToClipboard(text) {
+    function legacyCopy() {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.setAttribute('readonly', '');
+      ta.style.position = 'fixed';
+      ta.style.top = '-9999px';
+      ta.style.left = '0';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      ta.setSelectionRange(0, text.length);
+      var ok = false;
+      try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+      document.body.removeChild(ta);
+      return ok;
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      return navigator.clipboard.writeText(text).then(
+        function() { return true; },
+        function() { return legacyCopy(); }
+      );
+    }
+    try { return Promise.resolve(legacyCopy()); } catch (e) { return Promise.resolve(false); }
+  }
+
+  function copyPhrase(btn) {
+    var text = btn.getAttribute('data-copy-text') || '';
+    var original = btn.getAttribute('data-copy-label') || 'Copy';
+    copyToClipboard(text).then(function(ok) {
+      if (ok) {
+        btn.textContent = 'Copied';
+        btn.setAttribute('aria-label', 'Copied to clipboard');
+        announce('Copied recommendation to clipboard.');
+      } else {
+        btn.textContent = 'Copy failed';
+        btn.setAttribute('aria-label', 'Copy failed. Select the recommendation text and copy it manually.');
+        announce('Copying failed. Select the recommendation text and copy it manually.');
+      }
+      clearTimeout(btn._resetTimer);
+      btn._resetTimer = setTimeout(function() {
+        btn.textContent = original;
+        btn.removeAttribute('aria-label');
+      }, 2500);
+    });
+  }
+
+  function bindCopyButtons() {
+    Array.prototype.forEach.call(resultsContainer.querySelectorAll('.copy-btn'), function(btn) {
+      btn.addEventListener('click', function() { copyPhrase(btn); });
+    });
+  }
+
+  var _toolbarTimer = null;
+  function showToolbarFeedback(msg) {
+    if (!toolbarFeedback) return;
+    toolbarFeedback.textContent = msg;
+    toolbarFeedback.hidden = false;
+    if (_toolbarTimer) clearTimeout(_toolbarTimer);
+    _toolbarTimer = setTimeout(function() { toolbarFeedback.hidden = true; }, 3000);
+  }
+
+  function currentShareUrl() {
+    var q = (searchInput.value || '').trim();
+    var url = window.location.origin + window.location.pathname;
+    if (q) url += '?q=' + encodeURIComponent(q);
+    return url;
+  }
+
+  if (copySearchLinkBtn) {
+    copySearchLinkBtn.addEventListener('click', function() {
+      var url = currentShareUrl();
+      copyToClipboard(url).then(function(ok) {
+        if (ok) {
+          showToolbarFeedback('Link copied for this search.');
+          announce('Link to this search copied to the clipboard.');
+        } else {
+          showToolbarFeedback('Could not copy automatically — copy the address from the browser bar (Ctrl+C / Cmd+C).');
+          announce('Link copy failed. Copy the address from the browser bar.');
+        }
+      });
+    });
+  }
+
+  if (printBtn) {
+    printBtn.addEventListener('click', function() {
+      window.print();
+    });
+  }
 
   // Initialize
   loadGuidelines();

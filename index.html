@@ -76,8 +76,17 @@
     </section>
 
     <section class="results-section" aria-labelledby="results-heading">
-      <h2 id="results-heading">Search Results</h2>
+      <div class="results-head-row">
+        <h2 id="results-heading">Search Results</h2>
+        <div class="results-toolbar">
+          <button type="button" id="copy-search-link" class="tool-btn" title="Copy a link to this exact search">Copy search link</button>
+          <button type="button" id="print-results" class="tool-btn" title="Print these results">Print</button>
+        </div>
+      </div>
+      <p id="provenance" class="provenance" hidden></p>
+      <p class="clinical-note">Clinical reference aid — does not replace clinical judgement.</p>
       <p id="status-region" class="visually-hidden" role="status" aria-live="polite"></p>
+      <div id="toolbar-feedback" class="toolbar-feedback" hidden></div>
       <div id="results-stats" class="results-stats" hidden></div>
       <div id="results-container" class="results-container"></div>
       <div id="no-results" class="no-results" hidden>
