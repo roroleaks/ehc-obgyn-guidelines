@@ -55,4 +55,22 @@ function tmpDir(name) {
   return path.join(os.tmpdir(), name);
 }
 
-module.exports = { appRoot, chromePath, tmpDir };
+// Polls the Chrome DevTools endpoint until it accepts connections (then an
+// optional extra settle delay). Replaces fixed-delay bootstraps that race on
+// cold starts (notably CI runners where the first Chrome spawn is slow).
+async function waitForCdp(cdpPort, extraMs = 0, timeoutMs = 30000) {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    try {
+      const r = await fetch('http://127.0.0.1:' + cdpPort + '/json/version');
+      if (r.ok) {
+        if (extraMs) await new Promise(res => setTimeout(res, extraMs));
+        return;
+      }
+    } catch (_) { /* port not open yet */ }
+    await new Promise(res => setTimeout(res, 250));
+  }
+  throw new Error('CDP endpoint on port ' + cdpPort + ' did not become ready within ' + timeoutMs + 'ms');
+}
+
+module.exports = { appRoot, chromePath, tmpDir, waitForCdp };

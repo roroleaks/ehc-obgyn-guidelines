@@ -3,7 +3,7 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const { spawn } = require('child_process');
-const { appRoot, chromePath, tmpDir } = require('./_helpers');
+const { appRoot, chromePath, tmpDir, waitForCdp } = require('./_helpers');
 
 const APP = appRoot;
 const CHROME = chromePath();
@@ -33,8 +33,9 @@ server.listen(PORT, () => {
     'about:blank'
   ]);
   chrome.stderr.on('data', () => {});
-  setTimeout(async () => {
+  (async () => {
     try {
+      await waitForCdp(CDP_PORT);
       const targets = await fetch(`http://127.0.0.1:${CDP_PORT}/json/new?${encodeURIComponent('about:blank')}`, { method: 'PUT' }).then(r => r.json());
       const ws = new WebSocket(targets.webSocketDebuggerUrl);
       let msgId = 0;
@@ -78,5 +79,5 @@ server.listen(PORT, () => {
       try { chrome.kill(); server.close(); } catch (_) {}
       console.error('ERR', e.message); process.exit(1);
     }
-  }, 1500);
+  })();
 });

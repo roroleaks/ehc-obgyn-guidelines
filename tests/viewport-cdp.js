@@ -3,7 +3,7 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const { execFile, spawn } = require('child_process');
-const { appRoot, chromePath, tmpDir } = require('./_helpers');
+const { appRoot, chromePath, tmpDir, waitForCdp } = require('./_helpers');
 
 const APP = appRoot;
 const CHROME = chromePath();
@@ -109,8 +109,9 @@ server.listen(PORT, () => {
   ]);
   chrome.stderr.on('data', (d) => { if (process.env.CDP_VERBOSE) process.stderr.write(d); });
 
-  setTimeout(async () => {
+  (async () => {
     try {
+      await waitForCdp(CDP_PORT);
       const targets = await fetch(`http://127.0.0.1:${CDP_PORT}/json/new?${encodeURIComponent('http://127.0.0.1:' + PORT + '/check2.html')}`, { method: 'PUT' }).then(r => r.json());
       const ws = new WebSocket(targets.webSocketDebuggerUrl);
       let msgId = 0;
@@ -174,5 +175,5 @@ server.listen(PORT, () => {
       console.error('CDP ERROR', e.message);
       process.exit(4);
     }
-  }, 1500);
+  })();
 });

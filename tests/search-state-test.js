@@ -5,7 +5,7 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const { spawn } = require('child_process');
-const { appRoot, chromePath, tmpDir } = require('./_helpers');
+const { appRoot, chromePath, tmpDir, waitForCdp } = require('./_helpers');
 
 const APP = appRoot;
 const CHROME = chromePath();
@@ -39,10 +39,11 @@ server.listen(PORT, () => {
   ]);
   chrome.stderr.on('data', () => {});
 
-  setTimeout(async () => {
-    let ws;
-    try {
-      const targets = await fetch(`http://127.0.0.1:${CDP_PORT}/json/new?${encodeURIComponent('http://127.0.0.1:' + PORT + '/index.html')}`, { method: 'PUT' }).then(r => r.json());
+(async () => {
+      let ws;
+      try {
+        await waitForCdp(CDP_PORT);
+        const targets = await fetch(`http://127.0.0.1:${CDP_PORT}/json/new?${encodeURIComponent('http://127.0.0.1:' + PORT + '/index.html')}`, { method: 'PUT' }).then(r => r.json());
       ws = new WebSocket(targets.webSocketDebuggerUrl);
       let msgId = 0;
       const pending = new Map();
@@ -281,5 +282,5 @@ server.listen(PORT, () => {
       console.error('HARNESS ERROR:', e.message);
       process.exit(2);
     }
-  }, 1500);
+  })();
 });
