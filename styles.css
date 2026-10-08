@@ -524,6 +524,31 @@ img { max-width: 100%; height: auto; display: block; }
   margin-bottom: 0.25rem;
 }
 .source-note { font-size: 0.8125rem !important; opacity: 0.6; margin-top: 1rem !important; }
+.qr-code-wrapper {
+  margin-top: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.qr-code-img {
+  width: 128px;
+  height: 128px;
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--color-border);
+  display: block;
+}
+.qr-code-caption {
+  font-size: 0.8125rem !important;
+  color: var(--color-text-muted);
+  margin-top: 0.5rem !important;
+  margin-bottom: 0 !important;
+  font-weight: 500;
+  text-align: center;
+}
 
 /* Footer */
 .footer { background: var(--color-surface); border-top: 1px solid var(--color-border); padding: 1.5rem 0; margin-top: auto; }
