@@ -45,12 +45,27 @@ function variantifyQuery(word) {
 }
 
 function stripTrailingS(w) {
-  if (w.length <= 2 || w.slice(-1) !== 's') return [w];
+  if (w.length <= 2) return [w];
   var forms = [w];
-  var base = w.slice(0, -1);
-  forms.push(base);
-  if (w.slice(-2) === 'es' && base.length > 2) forms.push(base);
-  if (w.slice(-3) === 'ies' && base.length > 2) forms.push(base.slice(0, -1) + 'y');
+  function add(f) { if (f && f.length >= 2 && forms.indexOf(f) === -1) forms.push(f); }
+
+  if (w.slice(-1) === 's') {
+    if (w.slice(-3) === 'ies' && w.length > 3) {
+      add(w.slice(0, -3) + 'y');
+    } else if (w.slice(-2) === 'es' && w.length > 3) {
+      add(w.slice(0, -2));
+      add(w.slice(0, -1));
+    } else {
+      add(w.slice(0, -1));
+    }
+  } else if (w.slice(-1) === 'y' && !/[aeiou]y$/.test(w)) {
+    add(w.slice(0, -1) + 'ies');
+  } else {
+    add(w + 's');
+    if (/(?:[sxz]|[sc]h)$/.test(w)) {
+      add(w + 'es');
+    }
+  }
   return forms;
 }
 
@@ -161,6 +176,8 @@ assert.strictEqual(performSearch('preeclampsia magnesium').results.length, 1, 'p
 assert.ok(performSearch('PreeClampSia').results.length > 0, 'uppercase must match');
 assert.ok(performSearch('caesarean').results.length > 0, 'caesarean variant must match cesarean text');
 assert.strictEqual(performSearch('cesarean sections').results.length, performSearch('cesarean section').results.length, 'singular/plural balanced');
+assert.strictEqual(performSearch('deliveries').results.length, performSearch('delivery').results.length, 'deliveries/delivery bidirectional inflections match');
+assert.strictEqual(performSearch('babies').results.length, performSearch('baby').results.length, 'babies/baby bidirectional inflections match');
 assert.ok(performSearch('haemorrhage').results.length > 0 || performSearch('hemorrhage').results.length > 0, 'hemorrhage family must match');
 assert.strictEqual(performSearch('zzzq9notaword').results.length, 0, 'nonsense must be empty');
 assert.ok(performSearch('   ').showInitial, 'empty shows initial');

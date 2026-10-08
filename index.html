@@ -49,6 +49,23 @@
           <button type="button" id="clear-search" class="clear-btn" aria-label="Clear search" hidden>×</button>
         </div>
         <p id="search-hint" class="search-hint">Type a keyword below — all matching phrases appear instantly.</p>
+        <div class="search-filters" id="search-filters" aria-label="Faceted search filters">
+          <div class="filter-field filter-topic-field">
+            <label for="topic-filter" class="filter-label">Topic:</label>
+            <select id="topic-filter" class="filter-select" aria-label="Filter by guideline topic">
+              <option value="all">All Guidelines</option>
+            </select>
+          </div>
+          <div class="filter-field filter-strength-field" role="group" aria-label="Filter by recommendation strength">
+            <span class="filter-label">Strength:</span>
+            <div class="strength-pills" id="strength-pills">
+              <button type="button" class="filter-pill active" data-strength="all" aria-pressed="true">All</button>
+              <button type="button" class="filter-pill filter-pill--strong" data-strength="strong" aria-pressed="false">Strong</button>
+              <button type="button" class="filter-pill filter-pill--conditional" data-strength="conditional" aria-pressed="false">Conditional</button>
+              <button type="button" class="filter-pill filter-pill--gps" data-strength="gps" aria-pressed="false">GPS</button>
+            </div>
+          </div>
+        </div>
         <details id="search-help" class="search-help">
           <summary id="search-help-toggle" class="search-help-toggle">Search help</summary>
           <div class="search-help-content">
@@ -108,7 +125,6 @@
     <div class="container">
       <p>Clinical reference aid — does not replace clinical judgement.</p>
       <p><a href="https://lms.ehc.gov.eg/lms/course/view.php?id=38" target="_blank" rel="noopener">View full guidelines on EHC LMS <span class="visually-hidden"> (opens in a new tab)</span>→</a></p>
-      <p class="copyright">© Dr. Raouf Roshdy</p>
       <p class="credit">Created by Dr. Raouf Roshdy</p>
     </div>
   </footer>

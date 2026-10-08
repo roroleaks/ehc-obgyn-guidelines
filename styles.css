@@ -180,6 +180,127 @@ img { max-width: 100%; height: auto; display: block; }
 .clear-btn:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--color-primary-light); }
 .clear-btn[hidden] { display: none; }
 .search-hint { margin-top: 0.75rem; font-size: 0.8125rem; color: var(--color-text-muted); }
+.search-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+  margin-top: 1rem;
+  padding-top: 0.875rem;
+  border-top: 1px solid var(--color-border);
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+.filter-field {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+.filter-topic-field {
+  flex: 1 1 240px;
+  min-width: 0;
+  max-width: 100%;
+}
+.filter-strength-field {
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 100%;
+}
+.filter-label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+}
+.filter-select {
+  font-family: inherit;
+  font-size: 0.84375rem;
+  color: var(--color-text);
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 0.35rem 0.625rem;
+  outline: none;
+  transition: border-color var(--transition);
+  flex: 1 1 0;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+.filter-select:focus {
+  border-color: var(--color-border-focus);
+  box-shadow: 0 0 0 2px var(--color-primary-light);
+}
+.strength-pills {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  flex-wrap: wrap;
+}
+.filter-pill {
+  font-family: inherit;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.25rem 0.625rem;
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  background: var(--color-bg);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.filter-pill:hover {
+  border-color: var(--color-primary);
+  color: var(--color-text);
+}
+.filter-pill.active {
+  background: var(--color-primary);
+  color: #ffffff;
+  border-color: var(--color-primary);
+}
+.filter-pill--strong.active {
+  background: var(--color-type-bg);
+  color: var(--color-type);
+  border-color: var(--color-type);
+}
+.filter-pill--conditional.active {
+  background: var(--color-type-cond-bg);
+  color: var(--color-type-cond);
+  border-color: var(--color-type-cond);
+}
+.filter-pill--gps.active {
+  background: var(--color-type-gps-bg);
+  color: var(--color-type-gps);
+  border-color: var(--color-type-gps);
+}
+.filter-pill:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--color-primary-light);
+}
+@media (prefers-color-scheme: dark) {
+  .filter-pill.active {
+    color: #0f1720;
+  }
+  .filter-pill--strong.active {
+    color: var(--color-type);
+  }
+  .filter-pill--conditional.active {
+    color: var(--color-type-cond);
+  }
+  .filter-pill--gps.active {
+    color: var(--color-type-gps);
+  }
+}
 .sync-status { margin-top: 0.5rem; font-size: 0.8125rem; color: var(--color-text-muted); display: flex; align-items: center; gap: 0.4rem; }
 .sync-status::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--color-primary); animation: pulse 1.5s ease-in-out infinite; flex: 0 0 auto; }
 .sync-status--syncing::before { background: var(--color-primary); animation: pulse 1.5s ease-in-out infinite; }
@@ -470,6 +591,36 @@ img { max-width: 100%; height: auto; display: block; }
   .footer p { font-size: 0.75rem; line-height: 1.5; }
   .results-stats { font-size: 0.8125rem; padding: 0.4375rem 0.625rem; }
   .results-head-row { flex-direction: column; align-items: flex-start; gap: 0.375rem; }
+  .search-filters {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.625rem;
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+  }
+  .filter-topic-field,
+  .filter-strength-field {
+    width: 100%;
+    max-width: 100%;
+    flex: 1 1 100%;
+  }
+  .filter-select {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+  .strength-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.375rem;
+  }
+  .filter-pill {
+    min-height: 36px;
+    padding: 0.35rem 0.65rem;
+    display: inline-flex;
+    align-items: center;
+  }
 }
 
 @media (min-width: 641px) {

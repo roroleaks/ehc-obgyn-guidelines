@@ -30,6 +30,10 @@
 
   var searchInput = document.getElementById('search-input');
   var clearBtn = document.getElementById('clear-search');
+  var topicFilter = document.getElementById('topic-filter');
+  var strengthPillsContainer = document.getElementById('strength-pills');
+  var selectedTopic = 'all';
+  var selectedStrength = 'all';
   var tagsContainer = document.getElementById('tags-container');
   var tagsSection = document.getElementById('tags-section');
   var tagsToggle = document.getElementById('tags-toggle');
@@ -90,6 +94,7 @@
         guidelinesData = data;
         processData();
         renderTags();
+        populateTopicFilter();
         mergeCachedAutoBooks();
         populateProvenance();
         syncWithLms();
@@ -223,6 +228,40 @@
     target.focus();
   }
 
+  function populateTopicFilter() {
+    if (!topicFilter || !guidelinesData || !guidelinesData.guidelines) return;
+    var currentVal = topicFilter.value || 'all';
+    var opts = '<option value="all">All Guidelines (' + guidelinesData.guidelines.length + ')</option>';
+    guidelinesData.guidelines.forEach(function(g) {
+      opts += '<option value="' + escapeHtml(g.id) + '">' + escapeHtml(g.title) + '</option>';
+    });
+    topicFilter.innerHTML = opts;
+    topicFilter.value = currentVal;
+  }
+
+  if (topicFilter) {
+    topicFilter.addEventListener('change', function() {
+      selectedTopic = topicFilter.value;
+      performSearch();
+    });
+  }
+
+  if (strengthPillsContainer) {
+    strengthPillsContainer.addEventListener('click', function(e) {
+      var btn = e.target.closest('.filter-pill');
+      if (!btn) return;
+      var str = btn.getAttribute('data-strength');
+      if (!str) return;
+      selectedStrength = str;
+      Array.prototype.forEach.call(strengthPillsContainer.querySelectorAll('.filter-pill'), function(p) {
+        var isThis = p === btn;
+        p.classList.toggle('active', isThis);
+        p.setAttribute('aria-pressed', isThis ? 'true' : 'false');
+      });
+      performSearch();
+    });
+  }
+
   function clearTagSelection() {
     selectedTag = null;
     Array.prototype.forEach.call(tagsContainer.querySelectorAll('.tag-btn'), function(b) {
@@ -298,12 +337,27 @@
   }
 
   function stripTrailingS(w) {
-    if (w.length <= 2 || w.slice(-1) !== 's') return [w];
+    if (w.length <= 2) return [w];
     var forms = [w];
-    var base = w.slice(0, -1);
-    forms.push(base);
-    if (w.slice(-2) === 'es' && base.length > 2) forms.push(base);
-    if (w.slice(-3) === 'ies' && base.length > 2) forms.push(base.slice(0, -1) + 'y');
+    function add(f) { if (f && f.length >= 2 && forms.indexOf(f) === -1) forms.push(f); }
+
+    if (w.slice(-1) === 's') {
+      if (w.slice(-3) === 'ies' && w.length > 3) {
+        add(w.slice(0, -3) + 'y');
+      } else if (w.slice(-2) === 'es' && w.length > 3) {
+        add(w.slice(0, -2));
+        add(w.slice(0, -1));
+      } else {
+        add(w.slice(0, -1));
+      }
+    } else if (w.slice(-1) === 'y' && !/[aeiou]y$/.test(w)) {
+      add(w.slice(0, -1) + 'ies');
+    } else {
+      add(w + 's');
+      if (/(?:[sxz]|[sc]h)$/.test(w)) {
+        add(w + 'es');
+      }
+    }
     return forms;
   }
 
@@ -371,7 +425,8 @@
 
   function performSearch() {
     var query = (currentSearch || '').trim().toLowerCase();
-    var showInitial = !query;
+    var hasFilter = (selectedTopic !== 'all') || (selectedStrength !== 'all');
+    var showInitial = !query && !hasFilter;
 
     if (showInitial) {
       showInitialState();
@@ -390,7 +445,7 @@
     // AND across words (all terms must appear), OR within each word's
     // variant/singular forms: "cesarean sections" matches phrases containing
     // "cesarean section" or "cesarean sections".
-    var results = filterByWords(uniqueWords, false);
+    var results = uniqueWords.length ? filterByWords(uniqueWords, false) : allPhrases.slice();
     var classification = classifyResults(results, uniqueWords);
 
     // Single word >= 4 chars: prefix fallback if substring matching yields nothing
@@ -404,8 +459,25 @@
       }
     }
 
+    // Apply Faceted Topic Filter
+    if (selectedTopic !== 'all') {
+      results = results.filter(function(item) {
+        return item.guidelineId === selectedTopic;
+      });
+      classification = classifyResults(results, uniqueWords);
+    }
+
+    // Apply Faceted Strength Filter
+    if (selectedStrength !== 'all') {
+      results = results.filter(function(item) {
+        var st = detectStrength(item.phrase);
+        return st && st.key === selectedStrength;
+      });
+      classification = classifyResults(results, uniqueWords);
+    }
+
     // Suggest a known spelling variant (e.g. "cesarean" for "caesarean") when nothing matches
-    var variantSuggestion = findVariantSuggestion(query);
+    var variantSuggestion = query ? findVariantSuggestion(query) : null;
 
     renderResults(results, query, uniqueWords, isPrefix, classification, variantSuggestion);
   }
@@ -434,7 +506,11 @@
       var nh = '';
       nh += '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><path d="M21 21l-4.35-4.35"></path><path d="M8 8l6 6"></path><path d="M14 8l-6 6"></path></svg>';
       nh += '<p><span class="no-results-badge">Not Found</span></p>';
-      nh += '<p>No phrases match "<strong>' + escapeHtml(query) + '</strong>"</p>';
+      if (query) {
+        nh += '<p>No phrases match "<strong>' + escapeHtml(query) + '</strong>"</p>';
+      } else {
+        nh += '<p>No phrases match the selected filters.</p>';
+      }
       if (words.length > 1) {
         nh += '<p class="no-results-hint">All search terms must appear in each result. Try removing one word or shortening a term.</p>';
       } else {
@@ -459,7 +535,7 @@
         });
       }
 
-      announce('No phrases match "' + query + '". No results found.');
+      announce(query ? ('No phrases match "' + query + '". No results found.') : 'No phrases match the selected filters.');
       return;
     }
 
@@ -501,8 +577,22 @@
       var allTermsNote = words.length > 1 ? ', all terms matched' : '';
       var prefixNote = isPrefix ? ' (prefix match)' : '';
 
-      var statsText = 'Showing ' + results.length + (results.length === 1 ? ' phrase' : ' phrases') +
-        ' for "' + query + '"' + prefixNote + allTermsNote + breakdown + '.';
+      var statsText = '';
+      if (query) {
+        statsText = 'Showing ' + results.length + (results.length === 1 ? ' phrase' : ' phrases') +
+          ' for "' + query + '"' + prefixNote + allTermsNote + breakdown + '.';
+      } else {
+        var filterParts = [];
+        if (selectedTopic !== 'all' && guidelinesData && guidelinesData.guidelines) {
+          var matchedG = guidelinesData.guidelines.find(function(g) { return g.id === selectedTopic; });
+          if (matchedG) filterParts.push(matchedG.title);
+        }
+        if (selectedStrength !== 'all') {
+          filterParts.push(selectedStrength.toUpperCase() + ' strength');
+        }
+        statsText = 'Showing ' + results.length + (results.length === 1 ? ' phrase' : ' phrases') +
+          (filterParts.length ? ' in ' + filterParts.join(' \u2014 ') : '') + '.';
+      }
       resultsStats.textContent = statsText;
       resultsContainer.innerHTML = cards;
       bindCopyButtons();
@@ -782,16 +872,35 @@
       var existing = {};
       guidelinesData.guidelines.forEach(function(g) { existing[String(g.bookId)] = true; });
       var added = false;
+      var sanitized = [];
       cached.forEach(function(g) {
+        if (!g || !g.phrases) return;
+        var cleanPhrases = [];
+        g.phrases.forEach(function(p) {
+          if (typeof p !== 'string') return;
+          if (p.length > 550) {
+            var parts = p.split(/(?<=[.!?])\s+(?=[A-Z0-9])/);
+            parts.forEach(function(part) {
+              var pc = part.trim();
+              if (pc.length >= 25 && pc.length <= 550) cleanPhrases.push(pc);
+            });
+          } else if (p.length >= 20) {
+            cleanPhrases.push(p);
+          }
+        });
+        g.phrases = cleanPhrases;
+        sanitized.push(g);
         if (!existing[String(g.bookId)]) {
           guidelinesData.guidelines.push(g);
           existing[String(g.bookId)] = true;
           added = true;
         }
       });
+      localStorage.setItem(AUTO_CACHE_KEY, JSON.stringify(sanitized));
       if (added) {
         processData();
         renderTags();
+        populateTopicFilter();
       }
     } catch (e) { /* localStorage unavailable or corrupt */ }
   }
@@ -812,14 +921,22 @@
       var raw = localStorage.getItem(AUTO_TAGS_KEY);
       if (!raw) return;
       var extra = JSON.parse(raw);
+      var validExtra = [];
       extra.forEach(function(t) {
         if (!t) return;
-        var norm = String(t).toLowerCase().replace(/ae/g, 'e');
+        var s = String(t).trim();
+        var words = s.toLowerCase().split(/\s+/).filter(Boolean);
+        // Exclude tags where any word is in GENERIC_WORDS or that match banned patterns
+        if (words.some(function(w) { return GENERIC_WORDS[w]; }) && words.length > 1) return;
+        if (s.toLowerCase().indexOf('again appears imminent') !== -1) return;
+        var norm = s.toLowerCase().replace(/ae/g, 'e');
         var exists = allTags.some(function(x) {
           return x.toLowerCase().replace(/ae/g, 'e') === norm;
         });
-        if (!exists) allTags.push(String(t));
+        if (!exists) allTags.push(s);
+        validExtra.push(s);
       });
+      localStorage.setItem(AUTO_TAGS_KEY, JSON.stringify(validExtra));
     } catch (e) { /* localStorage unavailable or corrupt */ }
   }
 
@@ -925,12 +1042,33 @@
         cacheAutoGuideline(created);
         processData();
         renderTags();
+        populateTopicFilter();
         if (currentSearch) performSearch();
       } else {
         skipped += 1;
       }
       ingestBooks(books, i + 1, syncTime, skipped);
     });
+  }
+
+  function extractHtmlText(container) {
+    if (!container) return '';
+    try {
+      var clone = container.cloneNode(true);
+      var bad = clone.querySelectorAll('script, style, noscript, nav, header, footer');
+      Array.prototype.forEach.call(bad, function(el) { el.remove(); });
+      var brs = clone.querySelectorAll('br');
+      Array.prototype.forEach.call(brs, function(br) {
+        br.replaceWith('\n');
+      });
+      var blockTags = clone.querySelectorAll('p, tr, div, li, h1, h2, h3, h4, h5, h6, th, td, blockquote');
+      Array.prototype.forEach.call(blockTags, function(b) {
+        b.insertAdjacentText('afterend', '\n\n');
+      });
+      return clone.textContent || '';
+    } catch (e) {
+      return container.textContent || '';
+    }
   }
 
   function ingestBook(meta) {
@@ -982,7 +1120,7 @@
                 var doc2 = new DOMParser().parseFromString(html2, 'text/html');
                 var content = doc2.getElementById('mod_book-chapter') || doc2.querySelector('.book_content');
                 if (!content) return all;
-                var text = content.textContent || '';
+                var text = extractHtmlText(content);
                 var title = (doc2.querySelector('h3, .mod_book_title') || {}).textContent || '';
                 if (title) text = title.replace(/^-?\s*/, '') + '\n\n' + text;
                 return all.concat([text]);
@@ -1028,6 +1166,24 @@
         .replace(/\s+/g, ' ')
         .trim();
       if (clean.length < 20) return;
+      if (/^(table of contents|chapter\s*\d+|references|appendix|page\s*\d+)\b/i.test(clean)) return;
+
+      // Avoid giant unbounded cards: split long blocks by sentence boundary
+      if (clean.length > 550) {
+        var sentences = clean.split(/(?<=[.!?])\s+(?=[A-Z0-9])/);
+        sentences.forEach(function(sent) {
+          var sc = sent.trim();
+          if (sc.length >= 25 && sc.length <= 550) {
+            var k = sc.toLowerCase().slice(0, 120);
+            if (!seen[k]) {
+              seen[k] = true;
+              phrases.push(sc);
+            }
+          }
+        });
+        return;
+      }
+
       var key = clean.toLowerCase().slice(0, 120);
       if (seen[key]) return;
       seen[key] = true;
@@ -1102,7 +1258,13 @@
     // third-pass noise words seen in practice run
     rigorous:1, research:1, local:1, opinion:1, leader:1, gestation:1, gestational:1,
     hour:1, hourly:1, healthy:1, strongly:1, supplementation:1, measurements:1,
-    litre:1, litres:1, conditions:1, diagnose:1, major:1, minute:1, oral:1, agents:1
+    litre:1, litres:1, conditions:1, diagnose:1, major:1, minute:1, oral:1, agents:1,
+    // fourth-pass non-medical / administrative / grammar words
+    again:1, appear:1, appears:1, appeared:1, appearing:1, imminent:1, planned:1,
+    expected:1, likely:1, unlikely:1, possible:1, impossible:1, general:1, overall:1,
+    standard:1, common:1, following:1, ensure:1, ensuring:1, review:1, comprehensive:1,
+    historical:1, prior:1, factor:1, factors:1, section:1, sections:1, table:1,
+    figure:1, report:1, reports:1, chapter:1, page:1, number:1, total:1, rate:1, rates:1
   };
 
   // Boundaries across which n-grams must never be formed
@@ -1264,6 +1426,16 @@
     currentSearch = '';
     clearBtn.hidden = true;
     if (selectedTag) clearTagSelection();
+    selectedTopic = 'all';
+    selectedStrength = 'all';
+    if (topicFilter) topicFilter.value = 'all';
+    if (strengthPillsContainer) {
+      Array.prototype.forEach.call(strengthPillsContainer.querySelectorAll('.filter-pill'), function(p) {
+        var isAll = p.getAttribute('data-strength') === 'all';
+        p.classList.toggle('active', isAll);
+        p.setAttribute('aria-pressed', isAll ? 'true' : 'false');
+      });
+    }
     pushQueryState('');
     performSearch();
     searchInput.focus();
@@ -1286,6 +1458,16 @@
       performSearch();
     } else {
       clearTagSelection();
+      selectedTopic = 'all';
+      selectedStrength = 'all';
+      if (topicFilter) topicFilter.value = 'all';
+      if (strengthPillsContainer) {
+        Array.prototype.forEach.call(strengthPillsContainer.querySelectorAll('.filter-pill'), function(p) {
+          var isAll = p.getAttribute('data-strength') === 'all';
+          p.classList.toggle('active', isAll);
+          p.setAttribute('aria-pressed', isAll ? 'true' : 'false');
+        });
+      }
       showInitialState();
     }
   });
