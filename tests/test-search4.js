@@ -106,32 +106,44 @@ function filterByWords(uniqueWords, usePrefix) {
   return allPhrases.filter(function(item) {
     var text = normalizeForMatch(item.phrase);
     return uniqueWords.every(function(w) {
-      if (phraseHasWordSubstring(text, w)) return true;
-      if (usePrefix && w.length >= 4) return new RegExp('(^|[^a-z])' + w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '[a-z]*').test(text);
-      return false;
+      if (usePrefix) {
+        if (phraseHasWordWhole(text, w)) return true;
+        if (w.length >= 4) return new RegExp('(^|[^a-z0-9])' + w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '[a-z0-9]*').test(text);
+        return false;
+      }
+      return phraseHasWordWhole(text, w);
     });
   });
 }
 
-function scoreMedicalExpression(phraseText, qWords) {
+function scoreMedicalExpression(phraseText, guidelineTitle, qWords) {
   if (!qWords || qWords.length <= 1) return 0;
   var norm = normalizeForMatch(phraseText);
+  var titleNorm = normalizeForMatch(guidelineTitle || '');
   var formLists = qWords.map(wordForms);
+  var score = 0;
   if (qWords.length === 2) {
     var p1 = '(?:' + formLists[0].map(f => f.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|') + ')';
     var p2 = '(?:' + formLists[1].map(f => f.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|') + ')';
-    var exactAdjacent = new RegExp('(^|[^a-z])' + p1 + '[\\s\\-]+' + p2 + '($|[^a-z])');
-    if (exactAdjacent.test(norm)) return 1000;
-    var nearAdjacent = new RegExp('(^|[^a-z])' + p1 + '[\\s\\-]+(?:and|or|of|in|to|the)?\\s*' + p2 + '($|[^a-z])');
-    if (nearAdjacent.test(norm)) return 500;
+    var exactAdjacent = new RegExp('(^|[^a-z0-9])' + p1 + '[\\s\\-]+' + p2 + '($|[^a-z0-9])');
+    if (exactAdjacent.test(norm)) score += 1000;
+    else {
+      var nearAdjacent = new RegExp('(^|[^a-z0-9])' + p1 + '[\\s\\-]+(?:and|or|of|in|to|the)?\\s*' + p2 + '($|[^a-z0-9])');
+      if (nearAdjacent.test(norm)) score += 500;
+      else if (qWords.every(w => phraseHasWordWhole(norm, w))) score += 100;
+      else score += 10;
+    }
   } else if (qWords.length > 2) {
     var parts = formLists.map(list => '(?:' + list.map(f => f.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|') + ')');
-    var exactMulti = new RegExp('(^|[^a-z])' + parts.join('[\\s\\-]+') + '($|[^a-z])');
-    if (exactMulti.test(norm)) return 1000;
+    var exactMulti = new RegExp('(^|[^a-z0-9])' + parts.join('[\\s\\-]+') + '($|[^a-z0-9])');
+    if (exactMulti.test(norm)) score += 1000;
+    else if (qWords.every(w => phraseHasWordWhole(norm, w))) score += 100;
+    else score += 10;
   }
-  var allWhole = qWords.every(w => phraseHasWordWhole(norm, w));
-  if (allWhole) return 100;
-  return 10;
+  if (qWords.every(w => phraseHasWordWhole(titleNorm, w))) {
+    score += 300;
+  }
+  return score;
 }
 
 function performSearch(query) {
@@ -145,8 +157,8 @@ function performSearch(query) {
   var results = filterByWords(uniqueWords, false);
   if (uniqueWords.length > 1) {
     results.sort(function(a, b) {
-      var sa = scoreMedicalExpression(a.phrase, uniqueWords);
-      var sb = scoreMedicalExpression(b.phrase, uniqueWords);
+      var sa = scoreMedicalExpression(a.phrase, a.guidelineTitle, uniqueWords);
+      var sb = scoreMedicalExpression(b.phrase, b.guidelineTitle, uniqueWords);
       return sb - sa;
     });
   }

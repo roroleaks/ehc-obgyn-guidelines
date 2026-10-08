@@ -17,6 +17,7 @@ const HARNESSES = [
   { file: 'test-render.js' },
   { file: 'test-all-phrases.js', required: [/Issues: 0\b/] },
   { file: 'test-search4.js', markers: ['ALL SEARCH4 ASSERTIONS PASSED'] },
+  { file: 'test-normal-labor.js', markers: ['PASS: normal labor validation tests passed!'] },
   { file: 'test-sync.js', noFailLines: true },
   // Browser (CDP) harnesses — self-start a local HTTP server + headless Chrome.
   { file: 'viewport-cdp.js', markers: ['ALL VIEWPORT CHECKS PASSED'] },

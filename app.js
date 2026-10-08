@@ -417,31 +417,42 @@
   }
   function phraseHasWordWhole(phraseNorm, w) {
     return wordForms(w).some(function(f) {
-      return new RegExp('(^|[^a-z])' + escapeRegex(f) + '($|[^a-z])').test(phraseNorm);
+      return new RegExp('(^|[^a-z0-9])' + escapeRegex(f) + '($|[^a-z0-9])').test(phraseNorm);
     });
   }
-  function scoreMedicalExpression(phraseText, qWords) {
+  function scoreMedicalExpression(phraseText, guidelineTitle, qWords) {
     if (!qWords || qWords.length <= 1) return 0;
     var norm = normalizeForMatch(phraseText);
+    var titleNorm = normalizeForMatch(guidelineTitle || '');
     var formLists = qWords.map(wordForms);
+    var score = 0;
 
-    // Contiguous expression check: adjacent words in order (e.g. "cervical dilatation" or "neonatal morbidity")
+    // Contiguous expression check: adjacent words in order (e.g. "normal labor" or "cervical dilatation")
     if (qWords.length === 2) {
       var p1 = '(?:' + formLists[0].map(escapeRegex).join('|') + ')';
       var p2 = '(?:' + formLists[1].map(escapeRegex).join('|') + ')';
-      var exactAdjacent = new RegExp('(^|[^a-z])' + p1 + '[\\s\\-]+' + p2 + '($|[^a-z])');
-      if (exactAdjacent.test(norm)) return 1000;
-      var nearAdjacent = new RegExp('(^|[^a-z])' + p1 + '[\\s\\-]+(?:and|or|of|in|to|the)?\\s*' + p2 + '($|[^a-z])');
-      if (nearAdjacent.test(norm)) return 500;
+      var exactAdjacent = new RegExp('(^|[^a-z0-9])' + p1 + '[\\s\\-]+' + p2 + '($|[^a-z0-9])');
+      if (exactAdjacent.test(norm)) score += 1000;
+      else {
+        var nearAdjacent = new RegExp('(^|[^a-z0-9])' + p1 + '[\\s\\-]+(?:and|or|of|in|to|the)?\\s*' + p2 + '($|[^a-z0-9])');
+        if (nearAdjacent.test(norm)) score += 500;
+        else if (qWords.every(function(w) { return phraseHasWordWhole(norm, w); })) score += 100;
+        else score += 10;
+      }
     } else if (qWords.length > 2) {
       var parts = formLists.map(function(list) { return '(?:' + list.map(escapeRegex).join('|') + ')'; });
-      var exactMulti = new RegExp('(^|[^a-z])' + parts.join('[\\s\\-]+') + '($|[^a-z])');
-      if (exactMulti.test(norm)) return 1000;
+      var exactMulti = new RegExp('(^|[^a-z0-9])' + parts.join('[\\s\\-]+') + '($|[^a-z0-9])');
+      if (exactMulti.test(norm)) score += 1000;
+      else if (qWords.every(function(w) { return phraseHasWordWhole(norm, w); })) score += 100;
+      else score += 10;
     }
 
-    var allWhole = qWords.every(function(w) { return phraseHasWordWhole(norm, w); });
-    if (allWhole) return 100;
-    return 10;
+    // Boost if the guideline title itself matches the search expression
+    if (qWords.every(function(w) { return phraseHasWordWhole(titleNorm, w); })) {
+      score += 300;
+    }
+
+    return score;
   }
 
   function classifyResults(results, qWords) {
@@ -480,7 +491,7 @@
 
     hideInitialState();
 
-    var words = query.split(/\s+/).filter(Boolean);
+    var words = query.replace(/[^\w\s]/g, ' ').split(/\s+/).filter(Boolean);
     var uniqueWords = [];
     words.forEach(function(w) {
       var wn = normalizeForMatch(w);
@@ -492,21 +503,21 @@
     var results = uniqueWords.length ? filterByWords(uniqueWords, false) : allPhrases.slice();
     if (uniqueWords.length > 1) {
       results.sort(function(a, b) {
-        var sa = scoreMedicalExpression(a.phrase, uniqueWords);
-        var sb = scoreMedicalExpression(b.phrase, uniqueWords);
+        var sa = scoreMedicalExpression(a.phrase, a.guidelineTitle, uniqueWords);
+        var sb = scoreMedicalExpression(b.phrase, b.guidelineTitle, uniqueWords);
         return sb - sa;
       });
     }
     var classification = classifyResults(results, uniqueWords);
 
-    // Single word >= 4 chars: prefix fallback if substring matching yields nothing
+    // Single word >= 4 chars: prefix fallback if whole-word matching yields nothing
     var isPrefix = false;
     if (results.length === 0 && uniqueWords.length === 1 && uniqueWords[0].length >= 4) {
       var prefixed = filterByWords(uniqueWords, true);
       if (prefixed.length) {
         results = prefixed;
         isPrefix = true;
-        classification = { exact: 0, prefix: prefixed.length, related: 0 };
+        classification = { exact: 0, prefix: prefixed.length, related: prefixed.length };
       }
     }
 
@@ -534,14 +545,18 @@
   }
 
   function filterByWords(uniqueWords, usePrefix) {
+    if (!uniqueWords.length) return [];
     return allPhrases.filter(function(item) {
       var text = normalizeForMatch(item.phrase);
       return uniqueWords.every(function(w) {
-        if (phraseHasWordSubstring(text, w)) return true;
-        if (usePrefix && w.length >= 4) {
-          return new RegExp('(^|[^a-z])' + escapeRegex(w) + '[a-z]*').test(text);
+        if (usePrefix) {
+          if (phraseHasWordWhole(text, w)) return true;
+          if (w.length >= 4) {
+            return new RegExp('(^|[^a-z0-9])' + escapeRegex(w) + '[a-z0-9]*').test(text);
+          }
+          return false;
         }
-        return false;
+        return phraseHasWordWhole(text, w);
       });
     });
   }
@@ -622,11 +637,11 @@
       var totalParts = [];
       if (c.exact > 0) totalParts.push(c.exact + ' exact');
       if (c.related > 0) totalParts.push(c.related + ' related');
-      if (c.prefix > 0 || isPrefix) totalParts.push((c.prefix || results.length) + (isPrefix ? ' by prefix' : ' broader'));
+      else if (c.prefix > 0 || isPrefix) totalParts.push((c.prefix || results.length) + (isPrefix ? ' by prefix' : ' broader'));
       var breakdown = totalParts.length ? ' \u2014 ' + totalParts.join(', ') : '';
 
       var allTermsNote = words.length > 1 ? ', all terms matched' : '';
-      var prefixNote = isPrefix ? ' (prefix match)' : '';
+      var prefixNote = '';
 
       var statsText = '';
       if (query) {
@@ -1189,8 +1204,8 @@
                 var content = doc2.getElementById('mod_book-chapter') || doc2.querySelector('.book_content');
                 if (!content) return all;
                 var text = extractHtmlText(content);
-                var title = (doc2.querySelector('h3, .mod_book_title') || {}).textContent || '';
-                if (title) text = title.replace(/^-?\s*/, '') + '\n\n' + text;
+                var title = (content.querySelector('h3, h4, .ccnMdlHeading') || {}).textContent || '';
+                if (title && !/login\b/i.test(title)) text = title.replace(/^-?\s*/, '') + '\n\n' + text;
                 return all.concat([text]);
               })
               .catch(function() { return all; });

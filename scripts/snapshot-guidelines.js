@@ -123,7 +123,8 @@ function cleanHtmlToBlocks(rawHtml) {
   for (let b of rawBlocks) {
     let text = b.replace(/\s+/g, ' ').trim();
     if (text.length < 25) continue;
-    if (/^(table of contents|chapter\s*\d+|references|appendix|page\s*\d+)\b/i.test(text)) continue;
+    if (text.startsWith('id="mod_book-chapter"')) continue;
+    if (/^(table of contents|chapter\s*\d+|references|appendix|page\s*\d+|find us on|all rights reserved)\b/i.test(text)) continue;
 
     // Sentence splitting for blocks > 550 chars
     if (text.length > 550) {
@@ -268,11 +269,20 @@ async function runSnapshot(apply = false) {
       const chUrl = `${BASE_LMS}/mod/book/view.php?id=${b.bookId}&chapterid=${cid}`;
       try {
         const chHtml = await fetchWithTimeout(chUrl, 10000);
-        const match = chHtml.match(/id="mod_book-chapter"[^>]*>([\s\S]*?)<\/div>/i) ||
-                      chHtml.match(/class="book_content"[^>]*>([\s\S]*?)<\/div>/i);
-        const body = match ? match[1] : '';
-        const chTitleMatch = chHtml.match(/<h3[^>]*>([\s\S]*?)<\/h3>/i);
-        const chTitle = chTitleMatch ? chTitleMatch[1].replace(/<[^>]+>/g, '').trim() : `Chapter ${cid}`;
+        const start = chHtml.indexOf('id="mod_book-chapter"');
+        const start2 = start === -1 ? chHtml.indexOf('class="book_content"') : start;
+        let body = '';
+        let chTitle = `Chapter ${cid}`;
+        if (start2 !== -1) {
+          const navBottom = chHtml.indexOf('<div class="navbottom"', start2);
+          const aside = chHtml.indexOf('<aside', start2);
+          const end = navBottom !== -1 ? navBottom : (aside !== -1 ? aside : chHtml.length);
+          body = chHtml.substring(start2, end);
+          const chTitleMatch = body.match(/<h3[^>]*>([\s\S]*?)<\/h3>/i);
+          if (chTitleMatch) {
+            chTitle = chTitleMatch[1].replace(/<[^>]+>/g, '').replace(/^-?\s*/, '').trim();
+          }
+        }
         const phrases = cleanHtmlToBlocks(body);
         return { chapterId: cid, title: chTitle, phrases };
       } catch (e) {
