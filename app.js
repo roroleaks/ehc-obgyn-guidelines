@@ -645,7 +645,7 @@
       var cards = results.map(function(item, idx) {
         var strength = detectStrength(item.phrase);
         var displayTags = phraseRelevantTags(item.phrase, item.tags || [], query);
-        return '<article class="result-card" data-book-id="' + item.guidelineBookId + '" style="animation-delay:' + (idx * 20) + 'ms">' +
+        return '<article class="result-card card-strength-' + (strength ? strength.key : 'default') + '" data-book-id="' + item.guidelineBookId + '" style="animation-delay:' + (idx * 20) + 'ms">' +
           '<header class="result-header">' +
             '<span class="result-guideline"><a href="https://lms.ehc.gov.eg/lms/mod/book/view.php?id=' + item.guidelineBookId + '" target="_blank" rel="noopener" aria-label="' + (escapeHtml(item.guidelineTitle)) + ', opens in a new tab">' + escapeHtml(item.guidelineTitle) + '<span class="visually-hidden"> (opens in a new tab)</span></a></span>' +
             '<span class="result-book-meta">Book ' + item.guidelineBookId + '</span>' +
@@ -1566,6 +1566,18 @@
   function escapeRegex(str) {
     return String(str).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   }
+
+  // Suggested keywords click listener in initial state
+  Array.prototype.forEach.call(document.querySelectorAll('[data-search-chip]'), function(chip) {
+    chip.addEventListener('click', function() {
+      var word = chip.getAttribute('data-search-chip');
+      searchInput.value = word;
+      currentSearch = word;
+      clearBtn.hidden = false;
+      pushQueryState(word);
+      performSearch();
+    });
+  });
 
   searchInput.addEventListener('input', function(e) {
     currentSearch = e.target.value;
