@@ -31,6 +31,12 @@
       "headers": {
         "Cache-Control": "no-cache, no-store, must-revalidate"
       }
+    },
+    {
+      "src": "/logo.png",
+      "headers": {
+        "Cache-Control": "public, max-age=31536000, immutable"
+      }
     }
   ]
 }

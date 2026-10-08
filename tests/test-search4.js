@@ -11,7 +11,13 @@ const VARIANT_MAP = {
   caesarean: 'cesarean', csection: 'c-section',
   haemorrhage: 'hemorrhage', oedema: 'edema', anaemia: 'anemia',
   labour: 'labor', foetal: 'fetal', neonatal: 'newborn',
-  sulphate: 'sulfate', bpd: 'bilateral pupil diameter',
+  sulphate: 'sulfate', bpd: 'biparietal diameter',
+  pph: 'postpartum hemorrhage', mgso4: 'magnesium',
+  mtx: 'methotrexate', txa: 'tranexamic acid',
+  tvus: 'transvaginal ultrasound', lmwh: 'low molecular weight heparin',
+  ctg: 'cardiotocography', gdm: 'gestational diabetes',
+  vbac: 'vaginal birth after cesarean', tolac: 'trial of labor after cesarean',
+  iud: 'intrauterine device', iugr: 'intrauterine growth restriction', fgr: 'fetal growth restriction',
   ivg: 'intravenous glucose', im: 'intramuscular',
   iu: 'international units', mcg: 'micrograms', hctz: 'hydrochlorothiazide'
 };
