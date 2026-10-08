@@ -113,6 +113,27 @@ function filterByWords(uniqueWords, usePrefix) {
   });
 }
 
+function scoreMedicalExpression(phraseText, qWords) {
+  if (!qWords || qWords.length <= 1) return 0;
+  var norm = normalizeForMatch(phraseText);
+  var formLists = qWords.map(wordForms);
+  if (qWords.length === 2) {
+    var p1 = '(?:' + formLists[0].map(f => f.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|') + ')';
+    var p2 = '(?:' + formLists[1].map(f => f.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|') + ')';
+    var exactAdjacent = new RegExp('(^|[^a-z])' + p1 + '[\\s\\-]+' + p2 + '($|[^a-z])');
+    if (exactAdjacent.test(norm)) return 1000;
+    var nearAdjacent = new RegExp('(^|[^a-z])' + p1 + '[\\s\\-]+(?:and|or|of|in|to|the)?\\s*' + p2 + '($|[^a-z])');
+    if (nearAdjacent.test(norm)) return 500;
+  } else if (qWords.length > 2) {
+    var parts = formLists.map(list => '(?:' + list.map(f => f.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|') + ')');
+    var exactMulti = new RegExp('(^|[^a-z])' + parts.join('[\\s\\-]+') + '($|[^a-z])');
+    if (exactMulti.test(norm)) return 1000;
+  }
+  var allWhole = qWords.every(w => phraseHasWordWhole(norm, w));
+  if (allWhole) return 100;
+  return 10;
+}
+
 function performSearch(query) {
   var q = (query || '').trim().toLowerCase();
   if (!q) return { query: q, showInitial: true, results: [], isPrefix: false, classification: { exact: 0, prefix: 0, related: 0 }, suggestion: null };
@@ -122,6 +143,13 @@ function performSearch(query) {
     if (uniqueWords.indexOf(wn) === -1) uniqueWords.push(wn);
   });
   var results = filterByWords(uniqueWords, false);
+  if (uniqueWords.length > 1) {
+    results.sort(function(a, b) {
+      var sa = scoreMedicalExpression(a.phrase, uniqueWords);
+      var sb = scoreMedicalExpression(b.phrase, uniqueWords);
+      return sb - sa;
+    });
+  }
   var classification = classifyResults(results, uniqueWords);
   var isPrefix = false;
   if (results.length === 0 && uniqueWords.length === 1 && uniqueWords[0].length >= 4) {
@@ -209,5 +237,23 @@ assert.strictEqual(testCleanTag('Assess Cervical Dilatation'), 'Cervical Dilatat
 assert.strictEqual(testCleanTag('Again Appears Imminent'), '', 'Again Appears Imminent -> empty');
 assert.ok(testCleanTag('Cannot Tolerate Erythromycin').split(/\s+/).length <= 2, 'Tag must be at most 2 words');
 assert.ok(testCleanTag('Affects Neonatal Morbidity').split(/\s+/).length <= 2, 'Tag must be at most 2 words');
+
+// 1. Contiguous medical expression ranking
+const cdResults = performSearch('cervical dilatation').results;
+assert.ok(cdResults.length > 0, 'cervical dilatation returns results');
+assert.ok(cdResults[0].phrase.toLowerCase().includes('cervical dilatation') || cdResults[0].phrase.toLowerCase().includes('cervical dilation'), 'Top result contains contiguous medical expression');
+
+// 2. Exact paragraph result bounding (< 550 chars, never whole page)
+allPhrases.forEach(item => {
+  assert.ok(item.phrase.length <= 550, 'Phrase must be <= 550 chars, got ' + item.phrase.length + ': ' + item.phrase.slice(0, 50));
+});
+
+// 3. All tag words in guidelines.json are logical (<= 2 words) and active
+d.allTags.forEach(tag => {
+  const words = tag.trim().split(/\s+/).filter(Boolean);
+  assert.ok(words.length >= 1 && words.length <= 2, 'Tag must be 1 or 2 words: ' + tag);
+  assert.ok(!ACTION_VERBS[words[0].toLowerCase()], 'Tag must not start with action verb: ' + tag);
+  assert.ok(!ACTION_VERBS[words[words.length - 1].toLowerCase()], 'Tag must not end with action verb: ' + tag);
+});
 
 console.log('ALL SEARCH4 ASSERTIONS PASSED');

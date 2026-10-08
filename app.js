@@ -157,14 +157,33 @@
 
     guidelinesData.guidelines.forEach(function(g) {
       g.phrases.forEach(function(phrase, idx) {
-        allPhrases.push({
-          id: g.id + '-' + idx,
-          guidelineId: g.id,
-          guidelineTitle: g.title,
-          guidelineBookId: g.bookId,
-          phrase: phrase,
-          tags: g.tags
-        });
+        if (typeof phrase !== 'string') return;
+        var trimmed = phrase.trim();
+        if (trimmed.length > 550) {
+          var sents = trimmed.split(/(?<=[.!?])\s+(?=[A-Z0-9])/);
+          sents.forEach(function(s, sIdx) {
+            var sc = s.trim();
+            if (sc.length >= 20) {
+              allPhrases.push({
+                id: g.id + '-' + idx + '-' + sIdx,
+                guidelineId: g.id,
+                guidelineTitle: g.title,
+                guidelineBookId: g.bookId,
+                phrase: sc,
+                tags: g.tags
+              });
+            }
+          });
+        } else if (trimmed.length >= 20) {
+          allPhrases.push({
+            id: g.id + '-' + idx,
+            guidelineId: g.id,
+            guidelineTitle: g.title,
+            guidelineBookId: g.bookId,
+            phrase: trimmed,
+            tags: g.tags
+          });
+        }
       });
     });
 
@@ -401,6 +420,30 @@
       return new RegExp('(^|[^a-z])' + escapeRegex(f) + '($|[^a-z])').test(phraseNorm);
     });
   }
+  function scoreMedicalExpression(phraseText, qWords) {
+    if (!qWords || qWords.length <= 1) return 0;
+    var norm = normalizeForMatch(phraseText);
+    var formLists = qWords.map(wordForms);
+
+    // Contiguous expression check: adjacent words in order (e.g. "cervical dilatation" or "neonatal morbidity")
+    if (qWords.length === 2) {
+      var p1 = '(?:' + formLists[0].map(escapeRegex).join('|') + ')';
+      var p2 = '(?:' + formLists[1].map(escapeRegex).join('|') + ')';
+      var exactAdjacent = new RegExp('(^|[^a-z])' + p1 + '[\\s\\-]+' + p2 + '($|[^a-z])');
+      if (exactAdjacent.test(norm)) return 1000;
+      var nearAdjacent = new RegExp('(^|[^a-z])' + p1 + '[\\s\\-]+(?:and|or|of|in|to|the)?\\s*' + p2 + '($|[^a-z])');
+      if (nearAdjacent.test(norm)) return 500;
+    } else if (qWords.length > 2) {
+      var parts = formLists.map(function(list) { return '(?:' + list.map(escapeRegex).join('|') + ')'; });
+      var exactMulti = new RegExp('(^|[^a-z])' + parts.join('[\\s\\-]+') + '($|[^a-z])');
+      if (exactMulti.test(norm)) return 1000;
+    }
+
+    var allWhole = qWords.every(function(w) { return phraseHasWordWhole(norm, w); });
+    if (allWhole) return 100;
+    return 10;
+  }
+
   function classifyResults(results, qWords) {
     var exact = 0, prefix = 0, related = 0;
     results.forEach(function(item) {
@@ -410,6 +453,7 @@
     });
     return { exact: exact, prefix: prefix, related: related };
   }
+
   function findVariantSuggestion(query) {
     var words = query.split(/\s+/).filter(Boolean);
     var vs = buildVariantSet();
@@ -444,9 +488,15 @@
     });
 
     // AND across words (all terms must appear), OR within each word's
-    // variant/singular forms: "cesarean sections" matches phrases containing
-    // "cesarean section" or "cesarean sections".
+    // variant/singular forms. Prioritize contiguous medical expression matches.
     var results = uniqueWords.length ? filterByWords(uniqueWords, false) : allPhrases.slice();
+    if (uniqueWords.length > 1) {
+      results.sort(function(a, b) {
+        var sa = scoreMedicalExpression(a.phrase, uniqueWords);
+        var sb = scoreMedicalExpression(b.phrase, uniqueWords);
+        return sb - sa;
+      });
+    }
     var classification = classifyResults(results, uniqueWords);
 
     // Single word >= 4 chars: prefix fallback if substring matching yields nothing
@@ -630,17 +680,27 @@
     var rawWords = query.toLowerCase().split(/\s+/).filter(Boolean);
     if (!rawWords.length) return escaped;
 
-    // Include both British/American spellings (caesarean/cesarean) as highlight targets
     var patterns = [];
     function pushPattern(p) {
-      if (patterns.indexOf(p) === -1) patterns.push(p);
+      if (p && patterns.indexOf(p) === -1) patterns.push(p);
     }
+
+    // If query is a multi-word expression, build contiguous expression patterns FIRST
+    // so the entire medical expression highlights as a cohesive block:
     if (rawWords.length > 1) {
-      pushPattern(escapeRegex(query.trim()));
-      if (query.indexOf('ae') !== -1) {
-        pushPattern(escapeRegex(query.trim().replace(/ae/g, 'e')));
+      var formLists = rawWords.map(wordForms);
+      if (rawWords.length === 2) {
+        formLists[0].forEach(function(w1) {
+          formLists[1].forEach(function(w2) {
+            pushPattern(escapeRegex(w1) + '[\\s\\-]+' + escapeRegex(w2));
+          });
+        });
+      } else {
+        pushPattern(escapeRegex(query.trim()));
       }
     }
+
+    // Then add individual words / variants for remaining occurrences
     rawWords.forEach(function(w) {
       pushPattern(escapeRegex(w));
       var variants = variantifyQuery(w);
@@ -648,13 +708,14 @@
         if (v && v.length >= 3) pushPattern(escapeRegex(v));
       });
       if (w.indexOf('ae') !== -1) {
-        // British -> American: caesarean -> cesarean
         pushPattern(escapeRegex(w.replace(/ae/g, 'e')));
       } else if (w.indexOf('e') !== -1) {
-        // American -> British: cesarean -> caesarean, hemorrhage -> haemorrhage
         pushPattern(escapeRegex(w.replace('e', 'ae')));
       }
     });
+
+    // Sort patterns by length descending so longer contiguous expressions match before single words
+    patterns.sort(function(a, b) { return b.length - a.length; });
 
     var regex = new RegExp('(' + patterns.join('|') + ')', 'gi');
     return escaped.replace(regex, '<mark>$1</mark>');
