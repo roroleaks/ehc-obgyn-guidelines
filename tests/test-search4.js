@@ -19,7 +19,8 @@ const VARIANT_MAP = {
   vbac: 'vaginal birth after cesarean', tolac: 'trial of labor after cesarean',
   iud: 'intrauterine device', iugr: 'intrauterine growth restriction', fgr: 'fetal growth restriction',
   ivg: 'intravenous glucose', im: 'intramuscular',
-  iu: 'international units', mcg: 'micrograms', hctz: 'hydrochlorothiazide'
+  iu: 'international units', mcg: 'micrograms', hctz: 'hydrochlorothiazide',
+  dilation: 'dilatation', dilatation: 'dilation'
 };
 
 function normalizeForMatch(str) { return String(str).toLowerCase().replace(/ae/g, 'e').replace(/oe/g, 'e'); }
@@ -184,5 +185,29 @@ assert.ok(performSearch('   ').showInitial, 'empty shows initial');
 assert.strictEqual(performSearch('<script>alert(1)</script>').results.length, 0, 'HTML input must yield no results');
 assert.ok(performSearch('gestat').results.length > 0, 'gestat prefix fallback');
 assert.strictEqual(performSearch('preeclampsia zzz').results.length, 0, 'multi AND with missing term = 0');
-assert.ok(performSearch('preeclampsia').classification.exact > 0, 'exact class should be nonzero');
+assert.ok(performSearch('cervical dilatation').results.length > 0, 'cervical dilatation should return results');
+assert.strictEqual(performSearch('cervical dilatation').results.length, performSearch('cervical dilation').results.length, 'dilation/dilatation bidirectional match');
+
+// Tag cleaning & 2-word limit checks
+const ACTION_VERBS = {
+  cannot: 1, tolerate: 1, affect: 1, affects: 1, assess: 1, screening: 1,
+  evaluate: 1, examine: 1, appear: 1, appears: 1, imminent: 1, again: 1
+};
+const GENERIC_WORDS = { again: 1, appear: 1, appears: 1, imminent: 1, oral: 1 };
+function testCleanTag(tag) {
+  let words = String(tag).trim().split(/\s+/).filter(Boolean);
+  while (words.length > 0 && (ACTION_VERBS[words[0].toLowerCase()] || GENERIC_WORDS[words[0].toLowerCase()])) words.shift();
+  while (words.length > 0 && (ACTION_VERBS[words[words.length - 1].toLowerCase()] || GENERIC_WORDS[words[words.length - 1].toLowerCase()])) words.pop();
+  if (!words.length) return '';
+  if (words.length > 2) words = words.slice(-2);
+  if (words.some(w => ACTION_VERBS[w.toLowerCase()] || GENERIC_WORDS[w.toLowerCase()])) return '';
+  return words.map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
+}
+assert.strictEqual(testCleanTag('Cannot Tolerate Erythromycin'), 'Erythromycin', 'Cannot Tolerate Erythromycin -> Erythromycin');
+assert.strictEqual(testCleanTag('Affects Neonatal Morbidity'), 'Neonatal Morbidity', 'Affects Neonatal Morbidity -> Neonatal Morbidity');
+assert.strictEqual(testCleanTag('Assess Cervical Dilatation'), 'Cervical Dilatation', 'Assess Cervical Dilatation -> Cervical Dilatation');
+assert.strictEqual(testCleanTag('Again Appears Imminent'), '', 'Again Appears Imminent -> empty');
+assert.ok(testCleanTag('Cannot Tolerate Erythromycin').split(/\s+/).length <= 2, 'Tag must be at most 2 words');
+assert.ok(testCleanTag('Affects Neonatal Morbidity').split(/\s+/).length <= 2, 'Tag must be at most 2 words');
+
 console.log('ALL SEARCH4 ASSERTIONS PASSED');

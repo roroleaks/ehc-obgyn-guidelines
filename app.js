@@ -25,7 +25,8 @@
     vbac: 'vaginal birth after cesarean', tolac: 'trial of labor after cesarean',
     iud: 'intrauterine device', iugr: 'intrauterine growth restriction', fgr: 'fetal growth restriction',
     ivg: 'intravenous glucose', im: 'intramuscular',
-    iu: 'international units', mcg: 'micrograms', hctz: 'hydrochlorothiazide'
+    iu: 'international units', mcg: 'micrograms', hctz: 'hydrochlorothiazide',
+    dilation: 'dilatation', dilatation: 'dilation'
   });
 
   var searchInput = document.getElementById('search-input');
@@ -924,17 +925,19 @@
       var validExtra = [];
       extra.forEach(function(t) {
         if (!t) return;
-        var s = String(t).trim();
-        var words = s.toLowerCase().split(/\s+/).filter(Boolean);
-        // Exclude tags where any word is in GENERIC_WORDS or that match banned patterns
-        if (words.some(function(w) { return GENERIC_WORDS[w]; }) && words.length > 1) return;
-        if (s.toLowerCase().indexOf('again appears imminent') !== -1) return;
-        var norm = s.toLowerCase().replace(/ae/g, 'e');
+        var label = labelizeTag(String(t));
+        if (!label) return;
+        var words = label.toLowerCase().split(/\s+/).filter(Boolean);
+        // Exclude tags with not 1 or 2 words, or containing banned verbs/noise words
+        if (words.length < 1 || words.length > 2) return;
+        if (words.some(function(w) { return GENERIC_WORDS[w] || (typeof ACTION_VERBS !== 'undefined' && ACTION_VERBS[w]); })) return;
+        if (label.toLowerCase().indexOf('again appears imminent') !== -1) return;
+        var norm = label.toLowerCase().replace(/ae/g, 'e');
         var exists = allTags.some(function(x) {
           return x.toLowerCase().replace(/ae/g, 'e') === norm;
         });
-        if (!exists) allTags.push(s);
-        validExtra.push(s);
+        if (!exists) allTags.push(label);
+        if (validExtra.indexOf(label) === -1) validExtra.push(label);
       });
       localStorage.setItem(AUTO_TAGS_KEY, JSON.stringify(validExtra));
     } catch (e) { /* localStorage unavailable or corrupt */ }
@@ -945,7 +948,11 @@
       var raw = localStorage.getItem(AUTO_TAGS_KEY);
       var arr = raw ? JSON.parse(raw) : [];
       newTags.forEach(function(t) {
-        if (arr.indexOf(t) === -1) arr.push(t);
+        var clean = labelizeTag(t);
+        if (!clean) return;
+        var words = clean.split(/\s+/).filter(Boolean);
+        if (words.length < 1 || words.length > 2) return;
+        if (arr.indexOf(clean) === -1) arr.push(clean);
       });
       localStorage.setItem(AUTO_TAGS_KEY, JSON.stringify(arr));
     } catch (e) { /* ignore */ }
@@ -1299,6 +1306,59 @@
     return bw(b, a) || bw(a, b);
   }
 
+  // Action verbs commonly starting clinical recommendation clauses that must be stripped from tags
+  var ACTION_VERBS = Object.freeze({
+    assess:1, assessing:1, assessment:1, assessments:1,
+    screen:1, screening:1, screenings:1,
+    evaluate:1, evaluating:1, evaluation:1,
+    examine:1, examining:1, examination:1,
+    perform:1, performing:1, performance:1,
+    provide:1, providing:1, provision:1,
+    offer:1, offering:1,
+    consider:1, considering:1, consideration:1,
+    determine:1, determining:1, determination:1,
+    check:1, checking:1,
+    measure:1, measuring:1, measurement:1, measurements:1,
+    monitor:1, monitoring:1,
+    identify:1, identifying:1, identification:1,
+    administer:1, administering:1, administration:1,
+    advise:1, advising:1, advice:1,
+    recommend:1, recommending:1, recommendation:1, recommendations:1,
+    manage:1, managing:1, management:1,
+    treat:1, treating:1, treatment:1,
+    discuss:1, discussing:1, discussion:1,
+    prevent:1, preventing:1, prevention:1,
+    reduce:1, reducing:1, reduction:1,
+    avoid:1, avoiding:1, avoidance:1,
+    ensure:1, ensuring:1,
+    inform:1, informing:1, information:1,
+    apply:1, applying:1, application:1,
+    cannot:1, tolerate:1, tolerated:1, tolerating:1, tolerance:1,
+    affect:1, affects:1, affected:1, affecting:1, effect:1, effects:1,
+    cause:1, causes:1, causing:1, result:1, resulting:1,
+    require:1, requires:1, requiring:1, indicate:1, indicates:1, indicating:1
+  });
+
+  function cleanCandidateTag(tag) {
+    if (!tag) return '';
+    var words = String(tag).trim().split(/\s+/).filter(Boolean);
+    while (words.length > 0 && (ACTION_VERBS[words[0].toLowerCase()] || GENERIC_WORDS[words[0].toLowerCase()])) {
+      words.shift();
+    }
+    while (words.length > 0 && (ACTION_VERBS[words[words.length - 1].toLowerCase()] || GENERIC_WORDS[words[words.length - 1].toLowerCase()])) {
+      words.pop();
+    }
+    if (!words.length) return '';
+    // Strictly allow at most 2 words per user instruction
+    if (words.length > 2) {
+      words = words.slice(-2);
+    }
+    if (words.some(function(w) { return ACTION_VERBS[w.toLowerCase()] || GENERIC_WORDS[w.toLowerCase()]; })) {
+      return '';
+    }
+    return words.join(' ');
+  }
+
   // Reject any candidate already covered by a tag in the search library
   function coveredByExistingTag(key) {
     return allTags.some(function(x) {
@@ -1307,7 +1367,9 @@
   }
 
   function labelizeTag(s) {
-    return s.split(' ').map(function(w) {
+    var cleaned = cleanCandidateTag(s);
+    if (!cleaned) return '';
+    return cleaned.split(' ').map(function(w) {
       if (isAbbreviation(w)) return w;
       return w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
     }).join(' ');
@@ -1315,54 +1377,45 @@
 
   function extractNewTags(phrases) {
     if (!phrases || !phrases.length) return [];
-    var uniCount = {}, biCount = {}, triCount = {}, uniLabel = {}, uniOrig = {}, biLabel = {}, triLabel = {};
+    var uniCount = {}, biCount = {}, uniLabel = {}, uniOrig = {}, biLabel = {};
 
     phrases.forEach(function(p) {
       var text = String(p);
-      // Capture tokens with positions so n-grams never cross sentence/punctuation boundaries
       var tokens = [], offsets = [];
       var re = /[A-Za-z]+(?:'\w+)?/g, m;
       while ((m = re.exec(text)) !== null) {
         tokens.push(m[0]);
         offsets.push(m.index);
       }
-      var seenU = {}, seenB = {}, seenT = {};
+      var seenU = {}, seenB = {};
       for (var i = 0; i < tokens.length; i++) {
         var t1 = tokens[i], l1 = t1.toLowerCase();
 
-        // Unigram candidate
-        if (isStrongWord(t1) && !seenU[l1] && !coveredByExistingTag(l1)) {
+        // Unigram candidate (single medical term, e.g. Erythromycin)
+        if (isStrongWord(t1) && !ACTION_VERBS[l1] && !seenU[l1] && !coveredByExistingTag(l1)) {
           seenU[l1] = true;
           uniCount[l1] = (uniCount[l1] || 0) + 1;
           if (!uniLabel[l1]) uniLabel[l1] = t1;
           if (!uniOrig[l1]) uniOrig[l1] = t1;
         }
 
-        // Bigram / trigram candidates (same sentence, no punctuation across)
+        // Bigram candidate (strictly 2 words, e.g. Neonatal Morbidity, Cervical Dilatation)
         if (i + 1 >= tokens.length) continue;
         var gap1 = text.slice(offsets[i] + t1.length, offsets[i + 1]);
         if (NGRAM_BREAK.test(gap1)) continue;
 
         var t2 = tokens[i + 1], l2 = t2.toLowerCase();
         if (validNgram([t1, t2])) {
-          var key2 = l1 + ' ' + l2;
-          if (!seenB[key2] && !coveredByExistingTag(key2)) {
-            seenB[key2] = true;
-            biCount[key2] = (biCount[key2] || 0) + 1;
-            if (!biLabel[key2]) biLabel[key2] = t1 + ' ' + t2;
+          var cleanToks = [t1, t2];
+          while (cleanToks.length > 1 && (ACTION_VERBS[cleanToks[0].toLowerCase()] || GENERIC_WORDS[cleanToks[0].toLowerCase()])) {
+            cleanToks.shift();
           }
-        }
-        if (i + 2 < tokens.length) {
-          var gap2 = text.slice(offsets[i + 1] + t2.length, offsets[i + 2]);
-          if (!NGRAM_BREAK.test(gap2)) {
-            var t3 = tokens[i + 2], l3 = t3.toLowerCase();
-            if (validNgram([t1, t2, t3])) {
-              var key3 = l1 + ' ' + l2 + ' ' + l3;
-              if (!seenT[key3] && !coveredByExistingTag(key3)) {
-                seenT[key3] = true;
-                triCount[key3] = (triCount[key3] || 0) + 1;
-                if (!triLabel[key3]) triLabel[key3] = t1 + ' ' + t2 + ' ' + t3;
-              }
+          if (cleanToks.length === 2) {
+            var key2 = cleanToks.map(function(x) { return x.toLowerCase(); }).join(' ');
+            if (!seenB[key2] && !coveredByExistingTag(key2)) {
+              seenB[key2] = true;
+              biCount[key2] = (biCount[key2] || 0) + 1;
+              if (!biLabel[key2]) biLabel[key2] = cleanToks.join(' ');
             }
           }
         }
@@ -1371,11 +1424,14 @@
 
     function validNgram(toks) {
       var lower = toks.map(function(t) { return t.toLowerCase(); });
+      while (lower.length > 1 && ACTION_VERBS[lower[0]]) {
+        lower.shift();
+      }
+      if (lower.length !== 2) return false;
       var joint = lower.join(' ');
-      var anyStrong = toks.some(isStrongWord);
-      var okLength = joint.length >= (toks.length === 2 ? 10 : 13);
-      var allOk = toks.every(function(t, i) {
-        var lc = lower[i];
+      var anyStrong = lower.some(isStrongWord);
+      var okLength = joint.length >= 8;
+      var allOk = lower.every(function(lc) {
         return lc.length >= 3 && !GENERIC_WORDS[lc];
       });
       return okLength && allOk && anyStrong;
@@ -1383,8 +1439,6 @@
 
     var candidates = [];
     Object.keys(uniCount).forEach(function(k) {
-      // Keep frequent single words (>=2) that are capitalized (named concepts/drugs)
-      // or strongly recurring (>=3) even when written in lowercase
       if (uniCount[k] >= 2 && (/^[A-Z]/.test(uniOrig[k]) || uniCount[k] >= 3)) {
         candidates.push({ label: labelizeTag(uniLabel[k]), score: uniCount[k] * 10 });
       }
@@ -1392,11 +1446,7 @@
     Object.keys(biCount).forEach(function(k) {
       if (biCount[k] >= 2) candidates.push({ label: labelizeTag(biLabel[k]), score: biCount[k] * 22 + 11 });
     });
-    Object.keys(triCount).forEach(function(k) {
-      if (triCount[k] >= 2) candidates.push({ label: labelizeTag(triLabel[k]), score: triCount[k] * 33 + 22 });
-    });
 
-    // Select highest-scoring candidates, dropping any that overlap an already-chosen tag
     var result = [], accepted = [];
     candidates
       .sort(function(a, b) { return b.score - a.score || a.label.localeCompare(b.label); })

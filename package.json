@@ -9,7 +9,9 @@
     "deploy": "vercel --prod",
     "test": "node --check app.js && node tests/run-all.js",
     "test:syntax": "node --check app.js",
-    "test:harnesses": "node tests/run-all.js"
+    "test:harnesses": "node tests/run-all.js",
+    "snapshot": "node scripts/snapshot-guidelines.js",
+    "snapshot:apply": "node scripts/snapshot-guidelines.js --apply"
   },
   "keywords": [
     "ehc",
