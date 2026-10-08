@@ -29,7 +29,9 @@
         "Every effort should be made to provide cesarean sections to women in need, rather than striving to achieve a specific rate.",
         "The primary audience for this guideline includes health-care professionals namely obstetricians, midwives, nurses, and general medical practitioners, as well as managers of maternal and child health programs and public health policymakers in Egypt.",
         "The guideline uses the GRADE-Adolopment methodology adapted from existing WHO guidelines.",
-        "Non-clinical interventions refer to those interventions applied independently of a clinical encounter between a particular provider and patient in the context of patient care."
+        "Non-clinical interventions refer to those interventions applied independently of a clinical encounter between a particular provider and patient in the context of patient care.",
+        "For women requesting cesarean section without medical indication, explore the reasons for maternal request, offer psychological support, and discuss risks and benefits. (Strong)",
+        "Establish clinical quality improvement audit committees to review cesarean indications and maternal outcomes using the Robson classification system. (Strong)"
       ]
     },
     {
@@ -55,7 +57,9 @@
         "The Robson Classification (10-group classification) categorizes all pregnant women into 10 mutually exclusive groups based on obstetric characteristics.",
         "Each Robson group should be analyzed for its relative size and cesarean section rate to identify areas for intervention.",
         "Monitoring of cesarean section rate can be achieved through implementing the Robson classification system.",
-        "Regular audit using Robson classification should be mandatory in all maternity units in Egypt."
+        "Regular audit using Robson classification should be mandatory in all maternity units in Egypt.",
+        "Categorize women into Robson groups based on parity (nulliparous vs multiparous), gestational age, fetal presentation, and onset of labor. (Strong)",
+        "Auditing cesarean section rates by Robson groups helps evaluate perinatal outcomes and maternal or neonatal morbidity across maternity units. (Strong)"
       ]
     },
     {
@@ -116,7 +120,13 @@
         "In patients who choose continuation of a cesarean scar ectopic pregnancy, we recommend repeated cesarean delivery between 34 0/7 and 35 6/7 weeks of gestation. (Strong)",
         "Offer anti-D immunoglobulin prophylaxis at a dose of 250 IU (50 micrograms) to all rhesus-negative women who have a surgical procedure to manage an ectopic pregnancy or a miscarriage. (Strong)",
         "Do not offer anti-D immunoglobulin prophylaxis to women who receive solely medical management for an ectopic pregnancy or have a pregnancy of unknown location. (Strong)",
-        "An early pregnancy ultrasound scan at 6 weeks' gestation should be performed in any subsequent pregnancy due to the increased risk of ectopic pregnancy recurrence. (GPS)"
+        "An early pregnancy ultrasound scan at 6 weeks' gestation should be performed in any subsequent pregnancy due to the increased risk of ectopic pregnancy recurrence. (GPS)",
+        "In women with pregnancy of unknown location (PUL), obtain serial serum hCG measurements 48 hours apart and calculate the progesterone/hCG ratio. (Strong)",
+        "For interstitial or cornual pregnancy, laparoscopy or laparotomy with cornual resection or cornuostomy is recommended depending on hemodynamic stability. (Strong)",
+        "Interstitial pregnancy should be suspected when an eccentric gestational sac is identified high in the uterine fundus with thin surrounding myometrium. (Strong)",
+        "In women undergoing assisted reproductive technology presenting with pelvic pain or bleeding, maintain high suspicion for heterotopic pregnancy. (Strong)",
+        "Women who conceive via IVF or other assisted reproduction technologies are at higher risk for ectopic and heterotopic pregnancy. (Strong)",
+        "Laparoscopic salpingectomy is the preferred surgical treatment for tubal ectopic pregnancy in the presence of extensive tubal damage or contralateral healthy tube. (Strong)"
       ]
     },
     {
@@ -194,7 +204,11 @@
         "Ergometrine should not be administered to women with any hypertensive disorder of pregnancy, particularly preeclampsia or gestational hypertension; alternative oxytocic drugs should be considered. (Strong)",
         "Breastfeeding is recommended. (Strong)",
         "At 3 months postpartum, all women should be reviewed to ensure that BP, urinalysis, and any laboratory abnormalities have normalised. (Conditional)",
-        "Following hypertensive pregnancy, particularly pre-eclampsia, counselling should be provided about the heightened health risks for the mother (particularly cardiovascular) and the offspring. (Strong)"
+        "Following hypertensive pregnancy, particularly pre-eclampsia, counselling should be provided about the heightened health risks for the mother (particularly cardiovascular) and the offspring. (Strong)",
+        "Implement the Modified Early Obstetric Warning Score (MEOWS) chart for all inpatient obstetric admissions to ensure early detection of maternal deterioration. (Strong)",
+        "Fetal growth restriction should be monitored with serial ultrasound biometry and umbilical artery Doppler assessment in women with hypertensive disorders. (Strong)",
+        "Thromboprophylaxis with low-molecular-weight heparin (LMWH) should be administered to hospitalized women with severe hypertension or immobility. (Strong)",
+        "Ensure close postnatal monitoring of maternal blood pressure, urinalysis, and symptoms during the first 72 hours after delivery. (Strong)"
       ]
     },
     {
@@ -241,7 +255,11 @@
         "Caesarean section hysterectomy with the placenta left in situ is preferable to attempting to separate it from the uterine wall. (Strong)",
         "When the extent of the placenta accreta is limited in depth and surface area, uterus preserving surgery may be appropriate, including partial myometrial resection. (Conditional)",
         "There is limited evidence to support uterus preserving surgery in placenta percreta and women should be informed of the high risk of peripartum and secondary complications, including the need for secondary hysterectomy. (GPS)",
-        "In case of unsuspected placenta accreta spectrum diagnosed after the birth of the baby, the placenta should be left in situ and an emergency hysterectomy performed. (GPS)"
+        "In case of unsuspected placenta accreta spectrum diagnosed after the birth of the baby, the placenta should be left in situ and an emergency hysterectomy performed. (GPS)",
+        "Intraoperative cell salvage is recommended in placenta accreta spectrum surgery where massive hemorrhage is anticipated. (Strong)",
+        "Prophylactic balloon catheter placement by interventional radiology may be considered in selected high-risk placenta accreta spectrum cases. (Conditional)",
+        "Placenta accreta spectrum includes placenta creta, placenta increta (invading the myometrium), and placenta percreta (invading through the serosa). (Strong)",
+        "Preoperative ureteric stents placement should be considered when significant bladder or lower uterine segment invasion is suspected in placenta accreta. (Conditional)"
       ]
     },
     {
@@ -306,7 +324,9 @@
         "In adolescents with severe dysmenorrhea and/or endometriosis-associated pain, clinicians should prescribe hormonal contraceptives or progestogens. (Strong)",
         "Clinicians should avoid prescribing estrogen-only regimens for the treatment of vasomotor symptoms in postmenopausal women with a history of endometriosis, as these regimens may be associated with a higher risk of malignant transformation. (Strong)",
         "Clinicians should be aware that women with endometriosis who have undergone an early bilateral salpingo-oophorectomy as part of their treatment have an increased risk of diminished bone density, dementia, and cardiovascular disease. (GPS)",
-        "Clinicians should not routinely perform surgical excision/ablation for an incidental finding of asymptomatic endometriosis at the time of surgery. (Strong)"
+        "Clinicians should not routinely perform surgical excision/ablation for an incidental finding of asymptomatic endometriosis at the time of surgery. (Strong)",
+        "In women with deep endometriosis and significant concomitant adenomyosis, GnRH agonist therapy or surgical intervention should be considered based on symptom severity. (Conditional)",
+        "Clinicians should consider extra-pelvic endometriosis in women presenting with cyclical non-gynecological symptoms such as catamenial pneumothorax or cyclical sciatica. (Conditional)"
       ]
     },
     {
@@ -369,7 +389,11 @@
         "Intermittent auscultation of the fetal heart rate with either a Doppler ultrasound device or Pinard fetal stethoscope is recommended for healthy pregnant women in labor. (Strong)",
         "Auscultate the fetal heart rate every 15-30 minutes in active first stage of labor and every 5 minutes in the second stage, for at least 1 minute during and 30 seconds after a uterine contraction. (Strong)",
         "Before diagnosing arrest of labor in second stage, if maternal and fetal conditions permit, allow at least 1 h of pushing in multiparous women and at least 2 h of pushing in nulliparous women. (Strong)",
-        "Operative vaginal delivery in second stage of labor by experienced and well-trained physicians should be considered safe, acceptable alternative to cesarean delivery. Training in, and ongoing maintenance of, practical skills related to operative vaginal delivery should be encouraged. (Strong)"
+        "Operative vaginal delivery in second stage of labor by experienced and well-trained physicians should be considered safe, acceptable alternative to cesarean delivery. Training in, and ongoing maintenance of, practical skills related to operative vaginal delivery should be encouraged. (Strong)",
+        "External cephalic version (ECV) should be offered to all women with an uncomplicated singleton breech presentation at 36 weeks of gestation or beyond. (Strong)",
+        "Mechanical methods of induction, such as a Foley catheter balloon, are recommended as a safe and effective option for cervical ripening. (Strong)",
+        "Prostaglandin agents such as dinoprostone or oral misoprostol are recommended pharmacological options for labor induction and cervical ripening. (Strong)",
+        "Safe prevention of primary cesarean section requires avoiding labor dystocia overdiagnosis in the latent first stage of labor. (Strong)"
       ]
     },
     {
@@ -449,7 +473,8 @@
         "Resort to hysterectomy early (sooner rather than later) especially if life is threatened, bleeding continues after use of conservative treatment options, or blood transfusion is limited or not an option. (Strong)",
         "Subtotal (Supra-Vaginal) hysterectomy is quicker and safer in Major PPH. (GPS)",
         "Every maternity unit should have a multidisciplinary protocol for the management of PPH. (GPS)",
-        "All cases of PPH involving a blood loss of greater than 1500 ml should be the subject of a formal clinical incident review. (GPS)"
+        "All cases of PPH involving a blood loss of greater than 1500 ml should be the subject of a formal clinical incident review. (GPS)",
+        "Uterine massage and bimanual uterine compression are immediate first-line physical measures to manage postpartum hemorrhage due to uterine atony. (Strong)"
       ]
     },
     {
@@ -508,7 +533,8 @@
         "At the time of discharge, it is essential that women are advised to continue with their antiemetics for at least one week and that they know how to access further care. (Strong)",
         "Women with severe NVP or HG who have continued symptoms into the late second or the third trimester should be offered serial scans to monitor fetal growth. (Strong)",
         "Women who experience HG in pregnancy are at increased risk of PND, anxiety, and PTSD. (Strong)",
-        "Women with previous HG should be advised that there is a risk of recurrence in future pregnancies. (Strong)"
+        "Women with previous HG should be advised that there is a risk of recurrence in future pregnancies. (Strong)",
+        "Hospital admission for rehydration and antiemetics is indicated in women with hyperemesis gravidarum who have ketonuria, weight loss > 5%, or electrolyte imbalance. (Strong)"
       ]
     },
     {
@@ -597,7 +623,14 @@
         "Advise women that breathing exercises and having a shower or bath may reduce pain during the latent first stage of labor. (Conditional)",
         "Parenteral opioids, such as fentanyl, diamorphine and pethidine, are options for healthy pregnant women requesting pain relief during labor, depending on a woman's preferences and availability. (Conditional)",
         "Epidural analgesia may be offered for healthy pregnant women requesting pain relief during labor, depending on a woman's preferences and availability. (Conditional)",
-        "Do not routinely use oxytocin in the second stage of labor for women with epidural analgesia. (Strong)"
+        "Do not routinely use oxytocin in the second stage of labor for women with epidural analgesia. (Strong)",
+        "Excessive intake of hypotonic intravenous fluids during labor must be avoided to prevent maternal and fetal hyponatremia. (Strong)",
+        "Operative vaginal birth with vacuum or forceps should be performed by experienced operators when indicated for fetal compromise or prolonged second stage. (Strong)",
+        "Vacuum extraction is an effective operative vaginal birth method to facilitate delivery in the second stage of labor when traction is required. (Strong)",
+        "Perineal repair should be performed using continuous suturing for the vaginal mucosa and perineal muscles to reduce postpartum pain compared to interrupted sutures. (Strong)",
+        "Administer anti-D immunoglobulin within 72 hours of birth to Rh-negative unsensitized mothers who deliver an Rh-positive baby. (Strong)",
+        "In women with spontaneous rupture of membranes (SROM) at term, assess liquor color and fetal heart rate, and avoid digital vaginal examinations if labor has not started. (Strong)",
+        "Shoulder dystocia should be managed systematically by calling for senior help, performing the McRoberts maneuver, and applying suprapubic pressure. (Strong)"
       ]
     },
     {
@@ -626,7 +659,13 @@
         "Antenatal corticosteroids should be offered to women between 24+0 and 33+6 weeks of gestation who are at high risk of imminent preterm delivery within 7 days. (Strong)",
         "Magnesium sulfate should be offered for fetal neuroprotection to women between 24+0 and 31+6 weeks of gestation in established preterm labor or having a planned preterm birth. (Strong)",
         "Maintenance tocolytic therapy is not recommended for women who have had an episode of threatened preterm labor that responded to initial treatment. (Conditional)",
-        "Antibiotics are not recommended for women in spontaneous preterm labor with intact membranes and no evidence of infection. (Strong)"
+        "Antibiotics are not recommended for women in spontaneous preterm labor with intact membranes and no evidence of infection. (Strong)",
+        "Offer women with PPROM oral erythromycin 250 mg 4 times a day for a maximum of 10 days or until the woman is in established labor. (Strong)",
+        "In women with preterm prelabor rupture of membranes (PPROM), expectant management with antibiotic prophylaxis and surveillance for chorioamnionitis is recommended before 34 weeks. (Strong)",
+        "Consider quantitative fetal fibronectin testing in combination with cervical length measurement to assess the risk of spontaneous preterm birth in symptomatic women. (Conditional)",
+        "Antenatal corticosteroids and planned delivery timing are crucial clinical interventions to reduce respiratory distress syndrome and neonatal morbidity. (Strong)",
+        "Administer antenatal betamethasone (12 mg IM 24 hours apart) or dexamethasone (6 mg IM 12 hours apart, 4 doses) to accelerate fetal lung maturation. (Strong)",
+        "Tocolytic therapy with nifedipine (or indomethacin / atosiban) is recommended for up to 48 hours to permit completion of antenatal corticosteroids and transfer. (Strong)"
       ]
     }
   ],
