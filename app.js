@@ -259,9 +259,36 @@
     topicFilter.value = currentVal;
   }
 
+  function updateFiltersToggleLabel() {
+    var toggleEl = document.getElementById('search-options-toggle');
+    if (!toggleEl) return;
+    var labelEl = toggleEl.querySelector('.search-options-label');
+    if (!labelEl) return;
+    var activeCount = 0;
+    if (selectedTopic !== 'all') activeCount++;
+    if (selectedStrength !== 'all') activeCount++;
+    if (activeCount > 0) {
+      labelEl.textContent = 'Filters & Options (' + activeCount + ' active)';
+    } else {
+      labelEl.textContent = 'Filters & Options';
+    }
+  }
+
+  function updateSearchPlaceholder() {
+    if (!searchInput) return;
+    if (window.innerWidth <= 640) {
+      searchInput.setAttribute('placeholder', 'Search guidelines (e.g. preeclampsia, labor)...');
+    } else {
+      searchInput.setAttribute('placeholder', 'Type a tag word (e.g., preeclampsia, cesarean, oxytocin, methotrexate)...');
+    }
+  }
+  window.addEventListener('resize', updateSearchPlaceholder);
+  updateSearchPlaceholder();
+
   if (topicFilter) {
     topicFilter.addEventListener('change', function() {
       selectedTopic = topicFilter.value;
+      updateFiltersToggleLabel();
       performSearch();
     });
   }
@@ -278,6 +305,7 @@
         p.classList.toggle('active', isThis);
         p.setAttribute('aria-pressed', isThis ? 'true' : 'false');
       });
+      updateFiltersToggleLabel();
       performSearch();
     });
   }
@@ -328,7 +356,7 @@
     }
     if (resultsHeading) {
       resultsHeading.focus({ preventScroll: false });
-      resultsHeading.scrollIntoView({ block: 'nearest' });
+      resultsHeading.scrollIntoView({ block: 'start', behavior: 'smooth' });
     }
   }
 
@@ -683,7 +711,7 @@
         var resultsHeading = document.getElementById('results-heading');
         if (resultsHeading) {
           resultsHeading.focus({ preventScroll: false });
-          resultsHeading.scrollIntoView({ block: 'nearest' });
+          resultsHeading.scrollIntoView({ block: 'start', behavior: 'smooth' });
         }
       });
     });
@@ -1562,6 +1590,7 @@
         p.setAttribute('aria-pressed', isAll ? 'true' : 'false');
       });
     }
+    updateFiltersToggleLabel();
     pushQueryState('');
     performSearch();
     searchInput.focus();
@@ -1594,6 +1623,7 @@
           p.setAttribute('aria-pressed', isAll ? 'true' : 'false');
         });
       }
+      updateFiltersToggleLabel();
       showInitialState();
     }
   });
