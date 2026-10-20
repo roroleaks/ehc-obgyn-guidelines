@@ -201,6 +201,25 @@
     // Always include auto-extracted tags that were added to the search library in this browser
     mergeStoredNewTags();
 
+    // Also include any screened newTags present on guidelines in memory
+    if (guidelinesData && guidelinesData.guidelines) {
+      guidelinesData.guidelines.forEach(function(g) {
+        if (g.newTags && g.newTags.length) {
+          g.newTags.forEach(function(t) {
+            var clean = labelizeTag(t);
+            if (clean) {
+              var words = clean.split(/\s+/).filter(Boolean);
+              if (words.length >= 1 && words.length <= 2) {
+                if (!allTags.some(function(x) { return x.toLowerCase() === clean.toLowerCase(); })) {
+                  allTags.push(clean);
+                }
+              }
+            }
+          });
+        }
+      });
+    }
+
     allTags = allTags.sort(function(a, b) { return a.localeCompare(b); });
   }
 
@@ -998,6 +1017,9 @@
         if (!existing[String(g.bookId)]) {
           guidelinesData.guidelines.push(g);
           existing[String(g.bookId)] = true;
+          if (g.newTags && g.newTags.length) {
+            saveStoredNewTags(g.newTags);
+          }
           added = true;
         }
       });
@@ -1076,18 +1098,18 @@
       })
       .then(function(html) {
         var doc = new DOMParser().parseFromString(html, 'text/html');
-        var links = doc.querySelectorAll('a[href*="mod/book/view.php?id="]');
+        var links = doc.querySelectorAll('a[href*="mod/book/view.php?id="], a[href*="mod/resource/view.php?id="], a[href*="mod/page/view.php?id="]');
         var books = {};
         var order = [];
         Array.prototype.forEach.call(links, function(a) {
           var href = a.getAttribute('href');
           if (!href) return;
-          var m = href.match(/mod\/book\/view\.php\?id=(\d+)/);
+          var m = href.match(/mod\/(?:book|resource|page)\/view\.php\?id=(\d+)/);
           if (!m) return;
           var id = m[1];
           if (books[id]) return;
           var rawTitle = (a.textContent || '').replace(/\s+/g, ' ').trim();
-          books[id] = { bookId: parseInt(id, 10), title: rawTitle.replace(/\s+Book\s*$/i, '') };
+          books[id] = { bookId: parseInt(id, 10), title: rawTitle.replace(/\s+(?:Book|File|Page)\s*$/i, ''), href: href };
           order.push(id);
         });
 
@@ -1184,7 +1206,8 @@
 
   function ingestBook(meta) {
     var bookId = meta.bookId;
-    return fetchWithTimeout('https://lms.ehc.gov.eg/lms/mod/book/view.php?id=' + bookId, LMS_TIMEOUT_MS)
+    var targetUrl = meta.href || ('https://lms.ehc.gov.eg/lms/mod/book/view.php?id=' + bookId);
+    return fetchWithTimeout(targetUrl, LMS_TIMEOUT_MS)
       .then(function(res) {
         if (!res.ok) throw new Error('http-' + res.status);
         return res.text();
@@ -1216,7 +1239,32 @@
           }
         }
 
-        if (!chapterIds.length) return null;
+        function buildGuidelineFromChunks(chunks) {
+          var phrases = extractPhrases(chunks.join('\n\n'));
+          if (!phrases.length) return null;
+
+          var tags = autoTags(phrases);
+          var newTags = extractNewTags(phrases);
+          if (newTags.length) saveStoredNewTags(newTags);
+          var allBookTags = tags.slice();
+          newTags.forEach(function(t) {
+            if (allBookTags.indexOf(t) === -1) allBookTags.push(t);
+          });
+          return {
+            id: 'lms-live-' + bookId,
+            title: meta.title || ('EHC OB/GYN Guideline ' + bookId),
+            bookId: bookId,
+            tags: allBookTags.slice(0, 20),
+            newTags: newTags,
+            phrases: phrases
+          };
+        }
+
+        if (!chapterIds.length) {
+          var direct = doc.getElementById('mod_book-chapter') || doc.querySelector('.book_content, #page-content, .generalbox, [role="main"], main');
+          var text = direct ? extractHtmlText(direct) : extractHtmlText(doc.body);
+          return buildGuidelineFromChunks(text ? [text] : []);
+        }
 
         var queue = chapterIds.slice(0, 60);
         var chain = Promise.resolve([]);
@@ -1240,26 +1288,7 @@
           });
         });
 
-        return chain.then(function(chunks) {
-          var phrases = extractPhrases(chunks.join('\n\n'));
-          if (!phrases.length) return null;
-
-          var tags = autoTags(phrases);
-          var newTags = extractNewTags(phrases);
-          if (newTags.length) saveStoredNewTags(newTags);
-          var allBookTags = tags.slice();
-          newTags.forEach(function(t) {
-            if (allBookTags.indexOf(t) === -1) allBookTags.push(t);
-          });
-          return {
-            id: 'lms-live-' + bookId,
-            title: meta.title || ('EHC OB/GYN Guideline ' + bookId),
-            bookId: bookId,
-            tags: allBookTags.slice(0, 20),
-            newTags: newTags,
-            phrases: phrases
-          };
-        });
+        return chain.then(buildGuidelineFromChunks);
       })
       .catch(function() { return null; });
   }

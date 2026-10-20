@@ -28,6 +28,7 @@ const HARNESSES = [
   { file: 'search-state-test.js', markers: ['ALL SEARCH-STATE TESTS PASSED'] },
   { file: 'test-provenance.js', markers: ['ALL PROVENANCE TESTS PASSED'] },
   { file: 'test-clinical-expression-cases.js', markers: ['ALL CASE 1 & CASE 2 CLINICAL EXPRESSION TESTS PASSED (100%)'] },
+  { file: 'test-lms-auto-update.js', markers: ['ALL LMS AUTO-DETECTION, SCREENING & SEARCH UPDATE CHECKS PASSED (100%)'] },
   { file: 'qa-final.js', markers: ['ALL PRODUCTION QA CHECKS PASSED'] }
 ];
 
