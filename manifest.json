@@ -1,0 +1,39 @@
+{
+  "name": "OB Guide — EHC Obstetric & Gynecology Guidelines",
+  "short_name": "OB Guide",
+  "description": "Evidence-based clinical guidelines search and reference aid for Egyptian Health Council Obstetric and Gynecology Guidelines.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#144a70",
+  "theme_color": "#1a5c8a",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "favicon-32x32.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "app-icon.jpg",
+      "sizes": "1024x1024",
+      "type": "image/jpeg"
+    }
+  ]
+}
