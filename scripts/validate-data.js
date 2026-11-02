@@ -73,6 +73,12 @@ if (guidelines.guidelines.length !== 11) {
   fail(`guidelines.json has ${guidelines.guidelines.length} guidelines; expected 11`);
 }
 
+let declaredPhrasesCount = 0;
+guidelines.guidelines.forEach(g => { declaredPhrasesCount += g.phrases.length; });
+if (guidelines.totalPhrases !== declaredPhrasesCount) {
+  fail(`guidelines.totalPhrases mismatch: declared ${guidelines.totalPhrases}, actual phrases ${declaredPhrasesCount}`);
+}
+
 guidelines.guidelines.forEach(g => {
   if (!expectedBookIds.has(g.bookId)) {
     fail(`guidelines.json contains unauthorized bookId ${g.bookId} (${g.title})`);
