@@ -19,7 +19,6 @@ const tagSet = new Set((data.allTags || []).map(t => t.toLowerCase()));
 // CASE 1: Words and multi-word expressions NOT in allTags, but present in EHC guidelines
 const CASE_1_QUERIES = [
   // Multi-word medical expressions (all strictly not in allTags)
-  { query: 'shoulder dystocia', type: 'multi-word expression' },
   { query: 'fetal heart rate', type: 'multi-word expression' },
   { query: 'cervical ripening', type: 'multi-word expression' },
   { query: 'epidural analgesia', type: 'multi-word expression' },
@@ -27,24 +26,28 @@ const CASE_1_QUERIES = [
   { query: 'bimanual uterine compression', type: 'multi-word expression' },
   { query: 'active phase of labor', type: 'multi-word expression' },
   { query: 'blood pressure', type: 'multi-word expression' },
-  { query: 'vacuum extraction', type: 'multi-word expression' },
   { query: 'catamenial pneumothorax', type: 'multi-word expression' },
-  { query: 'hypotonic intravenous fluids', type: 'multi-word expression' },
+  { query: 'thoracic endometriosis', type: 'multi-word expression' },
+  { query: 'prophylactic oxytocin', type: 'multi-word expression' },
+  { query: 'respiratory distress', type: 'multi-word expression' },
   // Single medical words (all strictly not in allTags)
-  { query: 'dinoprostone', type: 'single word' },
   { query: 'betamethasone', type: 'single word' },
-  { query: 'mcroberts', type: 'single word' },
-  { query: 'dystocia', type: 'single word' },
-  { query: 'ketonuria', type: 'single word' }
+  { query: 'ketonuria', type: 'single word' },
+  { query: 'robson', type: 'single word' },
+  { query: 'bimanual', type: 'single word' }
 ];
 
 // CASE 2: Words and multi-word expressions NOT in EHC guidelines
 const CASE_2_QUERIES = [
   // Multi-word expressions
+  { query: 'shoulder dystocia', type: 'multi-word expression' },
   { query: 'coronary artery bypass', type: 'multi-word expression' },
   { query: 'total knee arthroplasty', type: 'multi-word expression' },
   { query: 'alzheimer disease dementia', type: 'multi-word expression' },
+  { query: 'hypotonic intravenous fluids', type: 'multi-word expression' },
   // Single words
+  { query: 'dinoprostone', type: 'single word' },
+  { query: 'mcroberts', type: 'single word' },
   { query: 'appendectomy', type: 'single word' },
   { query: 'amiodarone', type: 'single word' },
   { query: 'pneumococcal', type: 'single word' },

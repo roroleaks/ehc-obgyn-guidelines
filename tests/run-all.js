@@ -21,6 +21,7 @@ const HARNESSES = [
   { file: 'test-all-tags-thorough.js', markers: ['ALL 203 TAGS PASSED WITH EXACT MATCHES!'] },
   { file: 'test-non-tag-clinical-queries.js', markers: ['ALL 15 NON-TAG CLINICAL QUERIES PASSED WITH EXACT RECOMMENDATIONS!'] },
   { file: 'test-sync.js', noFailLines: true },
+  { file: 'test-sync-provenance-safety.js', markers: ['ALL SYNC PROVENANCE SAFETY CHECKS PASSED (100% OK)'] },
   // Browser (CDP) harnesses — self-start a local HTTP server + headless Chrome.
   { file: 'viewport-cdp.js', markers: ['ALL VIEWPORT CHECKS PASSED'] },
   { file: 'viewport-shots-cdp.js' },

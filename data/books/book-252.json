@@ -1,59 +1,93 @@
 {
   "bookId": 252,
+  "id": "non-clinical-cs",
   "title": "Non-Clinical Interventions to reduce overall cesarean sections",
   "url": "https://lms.ehc.gov.eg/lms/mod/book/view.php?id=252",
+  "sourceLastUpdated": "2026-07-21",
+  "contentHash": "8975b413456c06ccfc8383fe9736831194770bf3caf86e30a3a330e7811d3ba7",
+  "parseStatus": "verified",
   "timestamp": "2026-10-08T12:04:15.907Z",
   "chaptersCount": 10,
   "phrasesCount": 186,
   "chapters": [
     {
       "chapterId": "850",
-      "title": "Login to your account",
+      "title": "Executive Summary",
+      "chapterUrl": "https://lms.ehc.gov.eg/lms/mod/book/view.php?id=252&chapterid=850",
+      "isRecommendationChapter": true,
+      "isReferenceChapter": false,
       "phrasesCount": 11
     },
     {
       "chapterId": "851",
-      "title": "Login to your account",
+      "title": "Recommendations",
+      "chapterUrl": "https://lms.ehc.gov.eg/lms/mod/book/view.php?id=252&chapterid=851",
+      "isRecommendationChapter": true,
+      "isReferenceChapter": false,
       "phrasesCount": 9
     },
     {
       "chapterId": "849",
-      "title": "Login to your account",
+      "title": "Acknowledgements",
+      "chapterUrl": "https://lms.ehc.gov.eg/lms/mod/book/view.php?id=252&chapterid=849",
+      "isRecommendationChapter": false,
+      "isReferenceChapter": true,
       "phrasesCount": 29
     },
     {
       "chapterId": "852",
-      "title": "Login to your account",
+      "title": "Introduction",
+      "chapterUrl": "https://lms.ehc.gov.eg/lms/mod/book/view.php?id=252&chapterid=852",
+      "isRecommendationChapter": false,
+      "isReferenceChapter": false,
       "phrasesCount": 24
     },
     {
       "chapterId": "853",
-      "title": "Login to your account",
+      "title": "Methods",
+      "chapterUrl": "https://lms.ehc.gov.eg/lms/mod/book/view.php?id=252&chapterid=853",
+      "isRecommendationChapter": false,
+      "isReferenceChapter": false,
       "phrasesCount": 10
     },
     {
       "chapterId": "854",
-      "title": "Login to your account",
+      "title": "Priority questions and outcomes",
+      "chapterUrl": "https://lms.ehc.gov.eg/lms/mod/book/view.php?id=252&chapterid=854",
+      "isRecommendationChapter": false,
+      "isReferenceChapter": false,
       "phrasesCount": 19
     },
     {
       "chapterId": "855",
-      "title": "Login to your account",
+      "title": "Formulation of the recommendations",
+      "chapterUrl": "https://lms.ehc.gov.eg/lms/mod/book/view.php?id=252&chapterid=855",
+      "isRecommendationChapter": true,
+      "isReferenceChapter": false,
       "phrasesCount": 10
     },
     {
       "chapterId": "856",
-      "title": "Login to your account",
+      "title": "Evidence and recommendations",
+      "chapterUrl": "https://lms.ehc.gov.eg/lms/mod/book/view.php?id=252&chapterid=856",
+      "isRecommendationChapter": true,
+      "isReferenceChapter": false,
       "phrasesCount": 46
     },
     {
       "chapterId": "857",
-      "title": "Login to your account",
+      "title": "Implementation of the recommendations",
+      "chapterUrl": "https://lms.ehc.gov.eg/lms/mod/book/view.php?id=252&chapterid=857",
+      "isRecommendationChapter": true,
+      "isReferenceChapter": false,
       "phrasesCount": 11
     },
     {
       "chapterId": "858",
-      "title": "Login to your account",
+      "title": "References",
+      "chapterUrl": "https://lms.ehc.gov.eg/lms/mod/book/view.php?id=252&chapterid=858",
+      "isRecommendationChapter": false,
+      "isReferenceChapter": true,
       "phrasesCount": 17
     }
   ],

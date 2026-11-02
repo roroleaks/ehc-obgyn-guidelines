@@ -1,0 +1,281 @@
+{
+  "source": "Egyptian Health Council (EHC) Guidelines Audit",
+  "auditDate": "2026-11-02",
+  "totalQuarantined": 39,
+  "description": "Clinical recommendation phrases quarantined due to lack of source-level provenance, chapter mapping, or authentic LMS source quote.",
+  "quarantinedPhrases": [
+    {
+      "bookId": 252,
+      "phrase": "For women requesting cesarean section without medical indication, explore the reasons for maternal request, offer psychological support, and discuss risks and benefits. (Strong)",
+      "reason": "Unverified manual enrichment from scripts/enrich-guidelines-lms.js lacking EHC chapter ID, source text hash, and verbatim source quote in LMS content.",
+      "status": "quarantined",
+      "quarantineDate": "2026-11-02T12:00:00Z"
+    },
+    {
+      "bookId": 252,
+      "phrase": "Establish clinical quality improvement audit committees to review cesarean indications and maternal outcomes using the Robson classification system. (Strong)",
+      "reason": "Unverified manual enrichment from scripts/enrich-guidelines-lms.js lacking EHC chapter ID, source text hash, and verbatim source quote in LMS content.",
+      "status": "quarantined",
+      "quarantineDate": "2026-11-02T12:00:00Z"
+    },
+    {
+      "bookId": 646,
+      "phrase": "Categorize women into Robson groups based on parity (nulliparous vs multiparous), gestational age, fetal presentation, and onset of labor. (Strong)",
+      "reason": "Unverified manual enrichment from scripts/enrich-guidelines-lms.js lacking EHC chapter ID, source text hash, and verbatim source quote in LMS content.",
+      "status": "quarantined",
+      "quarantineDate": "2026-11-02T12:00:00Z"
+    },
+    {
+      "bookId": 646,
+      "phrase": "Auditing cesarean section rates by Robson groups helps evaluate perinatal outcomes and maternal or neonatal morbidity across maternity units. (Strong)",
+      "reason": "Unverified manual enrichment from scripts/enrich-guidelines-lms.js lacking EHC chapter ID, source text hash, and verbatim source quote in LMS content.",
+      "status": "quarantined",
+      "quarantineDate": "2026-11-02T12:00:00Z"
+    },
+    {
+      "bookId": 652,
+      "phrase": "In women with pregnancy of unknown location (PUL), obtain serial serum hCG measurements 48 hours apart and calculate the progesterone/hCG ratio. (Strong)",
+      "reason": "Unverified manual enrichment from scripts/enrich-guidelines-lms.js lacking EHC chapter ID, source text hash, and verbatim source quote in LMS content.",
+      "status": "quarantined",
+      "quarantineDate": "2026-11-02T12:00:00Z"
+    },
+    {
+      "bookId": 652,
+      "phrase": "For interstitial or cornual pregnancy, laparoscopy or laparotomy with cornual resection or cornuostomy is recommended depending on hemodynamic stability. (Strong)",
+      "reason": "Unverified manual enrichment from scripts/enrich-guidelines-lms.js lacking EHC chapter ID, source text hash, and verbatim source quote in LMS content.",
+      "status": "quarantined",
+      "quarantineDate": "2026-11-02T12:00:00Z"
+    },
+    {
+      "bookId": 652,
+      "phrase": "Interstitial pregnancy should be suspected when an eccentric gestational sac is identified high in the uterine fundus with thin surrounding myometrium. (Strong)",
+      "reason": "Unverified manual enrichment from scripts/enrich-guidelines-lms.js lacking EHC chapter ID, source text hash, and verbatim source quote in LMS content.",
+      "status": "quarantined",
+      "quarantineDate": "2026-11-02T12:00:00Z"
+    },
+    {
+      "bookId": 652,
+      "phrase": "In women undergoing assisted reproductive technology presenting with pelvic pain or bleeding, maintain high suspicion for heterotopic pregnancy. (Strong)",
+      "reason": "Unverified manual enrichment from scripts/enrich-guidelines-lms.js lacking EHC chapter ID, source text hash, and verbatim source quote in LMS content.",
+      "status": "quarantined",
+      "quarantineDate": "2026-11-02T12:00:00Z"
+    },
+    {
+      "bookId": 652,
+      "phrase": "Women who conceive via IVF or other assisted reproduction technologies are at higher risk for ectopic and heterotopic pregnancy. (Strong)",
+      "reason": "Unverified manual enrichment from scripts/enrich-guidelines-lms.js lacking EHC chapter ID, source text hash, and verbatim source quote in LMS content.",
+      "status": "quarantined",
+      "quarantineDate": "2026-11-02T12:00:00Z"
+    },
+    {
+      "bookId": 652,
+      "phrase": "Laparoscopic salpingectomy is the preferred surgical treatment for tubal ectopic pregnancy in the presence of extensive tubal damage or contralateral healthy tube. (Strong)",
+      "reason": "Unverified manual enrichment from scripts/enrich-guidelines-lms.js lacking EHC chapter ID, source text hash, and verbatim source quote in LMS content.",
+      "status": "quarantined",
+      "quarantineDate": "2026-11-02T12:00:00Z"
+    },
+    {
+      "bookId": 653,
+      "phrase": "Implement the Modified Early Obstetric Warning Score (MEOWS) chart for all inpatient obstetric admissions to ensure early detection of maternal deterioration. (Strong)",
+      "reason": "Unverified manual enrichment from scripts/enrich-guidelines-lms.js lacking EHC chapter ID, source text hash, and verbatim source quote in LMS content.",
+      "status": "quarantined",
+      "quarantineDate": "2026-11-02T12:00:00Z"
+    },
+    {
+      "bookId": 653,
+      "phrase": "Fetal growth restriction should be monitored with serial ultrasound biometry and umbilical artery Doppler assessment in women with hypertensive disorders. (Strong)",
+      "reason": "Unverified manual enrichment from scripts/enrich-guidelines-lms.js lacking EHC chapter ID, source text hash, and verbatim source quote in LMS content.",
+      "status": "quarantined",
+      "quarantineDate": "2026-11-02T12:00:00Z"
+    },
+    {
+      "bookId": 653,
+      "phrase": "Thromboprophylaxis with low-molecular-weight heparin (LMWH) should be administered to hospitalized women with severe hypertension or immobility. (Strong)",
+      "reason": "Unverified manual enrichment from scripts/enrich-guidelines-lms.js lacking EHC chapter ID, source text hash, and verbatim source quote in LMS content.",
+      "status": "quarantined",
+      "quarantineDate": "2026-11-02T12:00:00Z"
+    },
+    {
+      "bookId": 653,
+      "phrase": "Ensure close postnatal monitoring of maternal blood pressure, urinalysis, and symptoms during the first 72 hours after delivery. (Strong)",
+      "reason": "Unverified manual enrichment from scripts/enrich-guidelines-lms.js lacking EHC chapter ID, source text hash, and verbatim source quote in LMS content.",
+      "status": "quarantined",
+      "quarantineDate": "2026-11-02T12:00:00Z"
+    },
+    {
+      "bookId": 656,
+      "phrase": "Intraoperative cell salvage is recommended in placenta accreta spectrum surgery where massive hemorrhage is anticipated. (Strong)",
+      "reason": "Unverified manual enrichment from scripts/enrich-guidelines-lms.js lacking EHC chapter ID, source text hash, and verbatim source quote in LMS content.",
+      "status": "quarantined",
+      "quarantineDate": "2026-11-02T12:00:00Z"
+    },
+    {
+      "bookId": 656,
+      "phrase": "Prophylactic balloon catheter placement by interventional radiology may be considered in selected high-risk placenta accreta spectrum cases. (Conditional)",
+      "reason": "Unverified manual enrichment from scripts/enrich-guidelines-lms.js lacking EHC chapter ID, source text hash, and verbatim source quote in LMS content.",
+      "status": "quarantined",
+      "quarantineDate": "2026-11-02T12:00:00Z"
+    },
+    {
+      "bookId": 656,
+      "phrase": "Placenta accreta spectrum includes placenta creta, placenta increta (invading the myometrium), and placenta percreta (invading through the serosa). (Strong)",
+      "reason": "Unverified manual enrichment from scripts/enrich-guidelines-lms.js lacking EHC chapter ID, source text hash, and verbatim source quote in LMS content.",
+      "status": "quarantined",
+      "quarantineDate": "2026-11-02T12:00:00Z"
+    },
+    {
+      "bookId": 656,
+      "phrase": "Preoperative ureteric stents placement should be considered when significant bladder or lower uterine segment invasion is suspected in placenta accreta. (Conditional)",
+      "reason": "Unverified manual enrichment from scripts/enrich-guidelines-lms.js lacking EHC chapter ID, source text hash, and verbatim source quote in LMS content.",
+      "status": "quarantined",
+      "quarantineDate": "2026-11-02T12:00:00Z"
+    },
+    {
+      "bookId": 665,
+      "phrase": "In women with deep endometriosis and significant concomitant adenomyosis, GnRH agonist therapy or surgical intervention should be considered based on symptom severity. (Conditional)",
+      "reason": "Unverified manual enrichment from scripts/enrich-guidelines-lms.js lacking EHC chapter ID, source text hash, and verbatim source quote in LMS content.",
+      "status": "quarantined",
+      "quarantineDate": "2026-11-02T12:00:00Z"
+    },
+    {
+      "bookId": 665,
+      "phrase": "Clinicians should consider extra-pelvic endometriosis in women presenting with cyclical non-gynecological symptoms such as catamenial pneumothorax or cyclical sciatica. (Conditional)",
+      "reason": "Unverified manual enrichment from scripts/enrich-guidelines-lms.js lacking EHC chapter ID, source text hash, and verbatim source quote in LMS content.",
+      "status": "quarantined",
+      "quarantineDate": "2026-11-02T12:00:00Z"
+    },
+    {
+      "bookId": 670,
+      "phrase": "External cephalic version (ECV) should be offered to all women with an uncomplicated singleton breech presentation at 36 weeks of gestation or beyond. (Strong)",
+      "reason": "Unverified manual enrichment from scripts/enrich-guidelines-lms.js lacking EHC chapter ID, source text hash, and verbatim source quote in LMS content.",
+      "status": "quarantined",
+      "quarantineDate": "2026-11-02T12:00:00Z"
+    },
+    {
+      "bookId": 670,
+      "phrase": "Mechanical methods of induction, such as a Foley catheter balloon, are recommended as a safe and effective option for cervical ripening. (Strong)",
+      "reason": "Unverified manual enrichment from scripts/enrich-guidelines-lms.js lacking EHC chapter ID, source text hash, and verbatim source quote in LMS content.",
+      "status": "quarantined",
+      "quarantineDate": "2026-11-02T12:00:00Z"
+    },
+    {
+      "bookId": 670,
+      "phrase": "Prostaglandin agents such as dinoprostone or oral misoprostol are recommended pharmacological options for labor induction and cervical ripening. (Strong)",
+      "reason": "Unverified manual enrichment from scripts/enrich-guidelines-lms.js lacking EHC chapter ID, source text hash, and verbatim source quote in LMS content.",
+      "status": "quarantined",
+      "quarantineDate": "2026-11-02T12:00:00Z"
+    },
+    {
+      "bookId": 670,
+      "phrase": "Safe prevention of primary cesarean section requires avoiding labor dystocia overdiagnosis in the latent first stage of labor. (Strong)",
+      "reason": "Unverified manual enrichment from scripts/enrich-guidelines-lms.js lacking EHC chapter ID, source text hash, and verbatim source quote in LMS content.",
+      "status": "quarantined",
+      "quarantineDate": "2026-11-02T12:00:00Z"
+    },
+    {
+      "bookId": 713,
+      "phrase": "Uterine massage and bimanual uterine compression are immediate first-line physical measures to manage postpartum hemorrhage due to uterine atony. (Strong)",
+      "reason": "Unverified manual enrichment from scripts/enrich-guidelines-lms.js lacking EHC chapter ID, source text hash, and verbatim source quote in LMS content.",
+      "status": "quarantined",
+      "quarantineDate": "2026-11-02T12:00:00Z"
+    },
+    {
+      "bookId": 716,
+      "phrase": "Hospital admission for rehydration and antiemetics is indicated in women with hyperemesis gravidarum who have ketonuria, weight loss > 5%, or electrolyte imbalance. (Strong)",
+      "reason": "Unverified manual enrichment from scripts/enrich-guidelines-lms.js lacking EHC chapter ID, source text hash, and verbatim source quote in LMS content.",
+      "status": "quarantined",
+      "quarantineDate": "2026-11-02T12:00:00Z"
+    },
+    {
+      "bookId": 744,
+      "phrase": "Excessive intake of hypotonic intravenous fluids during labor must be avoided to prevent maternal and fetal hyponatremia. (Strong)",
+      "reason": "Unverified manual enrichment from scripts/enrich-guidelines-lms.js lacking EHC chapter ID, source text hash, and verbatim source quote in LMS content.",
+      "status": "quarantined",
+      "quarantineDate": "2026-11-02T12:00:00Z"
+    },
+    {
+      "bookId": 744,
+      "phrase": "Operative vaginal birth with vacuum or forceps should be performed by experienced operators when indicated for fetal compromise or prolonged second stage. (Strong)",
+      "reason": "Unverified manual enrichment from scripts/enrich-guidelines-lms.js lacking EHC chapter ID, source text hash, and verbatim source quote in LMS content.",
+      "status": "quarantined",
+      "quarantineDate": "2026-11-02T12:00:00Z"
+    },
+    {
+      "bookId": 744,
+      "phrase": "Vacuum extraction is an effective operative vaginal birth method to facilitate delivery in the second stage of labor when traction is required. (Strong)",
+      "reason": "Unverified manual enrichment from scripts/enrich-guidelines-lms.js lacking EHC chapter ID, source text hash, and verbatim source quote in LMS content.",
+      "status": "quarantined",
+      "quarantineDate": "2026-11-02T12:00:00Z"
+    },
+    {
+      "bookId": 744,
+      "phrase": "Perineal repair should be performed using continuous suturing for the vaginal mucosa and perineal muscles to reduce postpartum pain compared to interrupted sutures. (Strong)",
+      "reason": "Unverified manual enrichment from scripts/enrich-guidelines-lms.js lacking EHC chapter ID, source text hash, and verbatim source quote in LMS content.",
+      "status": "quarantined",
+      "quarantineDate": "2026-11-02T12:00:00Z"
+    },
+    {
+      "bookId": 744,
+      "phrase": "Administer anti-D immunoglobulin within 72 hours of birth to Rh-negative unsensitized mothers who deliver an Rh-positive baby. (Strong)",
+      "reason": "Unverified manual enrichment from scripts/enrich-guidelines-lms.js lacking EHC chapter ID, source text hash, and verbatim source quote in LMS content.",
+      "status": "quarantined",
+      "quarantineDate": "2026-11-02T12:00:00Z"
+    },
+    {
+      "bookId": 744,
+      "phrase": "In women with spontaneous rupture of membranes (SROM) at term, assess liquor color and fetal heart rate, and avoid digital vaginal examinations if labor has not started. (Strong)",
+      "reason": "Unverified manual enrichment from scripts/enrich-guidelines-lms.js lacking EHC chapter ID, source text hash, and verbatim source quote in LMS content.",
+      "status": "quarantined",
+      "quarantineDate": "2026-11-02T12:00:00Z"
+    },
+    {
+      "bookId": 744,
+      "phrase": "Shoulder dystocia should be managed systematically by calling for senior help, performing the McRoberts maneuver, and applying suprapubic pressure. (Strong)",
+      "reason": "Unverified manual enrichment from scripts/enrich-guidelines-lms.js lacking EHC chapter ID, source text hash, and verbatim source quote in LMS content.",
+      "status": "quarantined",
+      "quarantineDate": "2026-11-02T12:00:00Z"
+    },
+    {
+      "bookId": 771,
+      "phrase": "Offer women with PPROM oral erythromycin 250 mg 4 times a day for a maximum of 10 days or until the woman is in established labor. (Strong)",
+      "reason": "Unverified manual enrichment from scripts/enrich-guidelines-lms.js lacking EHC chapter ID, source text hash, and verbatim source quote in LMS content.",
+      "status": "quarantined",
+      "quarantineDate": "2026-11-02T12:00:00Z"
+    },
+    {
+      "bookId": 771,
+      "phrase": "In women with preterm prelabor rupture of membranes (PPROM), expectant management with antibiotic prophylaxis and surveillance for chorioamnionitis is recommended before 34 weeks. (Strong)",
+      "reason": "Unverified manual enrichment from scripts/enrich-guidelines-lms.js lacking EHC chapter ID, source text hash, and verbatim source quote in LMS content.",
+      "status": "quarantined",
+      "quarantineDate": "2026-11-02T12:00:00Z"
+    },
+    {
+      "bookId": 771,
+      "phrase": "Consider quantitative fetal fibronectin testing in combination with cervical length measurement to assess the risk of spontaneous preterm birth in symptomatic women. (Conditional)",
+      "reason": "Unverified manual enrichment from scripts/enrich-guidelines-lms.js lacking EHC chapter ID, source text hash, and verbatim source quote in LMS content.",
+      "status": "quarantined",
+      "quarantineDate": "2026-11-02T12:00:00Z"
+    },
+    {
+      "bookId": 771,
+      "phrase": "Antenatal corticosteroids and planned delivery timing are crucial clinical interventions to reduce respiratory distress syndrome and neonatal morbidity. (Strong)",
+      "reason": "Unverified manual enrichment from scripts/enrich-guidelines-lms.js lacking EHC chapter ID, source text hash, and verbatim source quote in LMS content.",
+      "status": "quarantined",
+      "quarantineDate": "2026-11-02T12:00:00Z"
+    },
+    {
+      "bookId": 771,
+      "phrase": "Administer antenatal betamethasone (12 mg IM 24 hours apart) or dexamethasone (6 mg IM 12 hours apart, 4 doses) to accelerate fetal lung maturation. (Strong)",
+      "reason": "Unverified manual enrichment from scripts/enrich-guidelines-lms.js lacking EHC chapter ID, source text hash, and verbatim source quote in LMS content.",
+      "status": "quarantined",
+      "quarantineDate": "2026-11-02T12:00:00Z"
+    },
+    {
+      "bookId": 771,
+      "phrase": "Tocolytic therapy with nifedipine (or indomethacin / atosiban) is recommended for up to 48 hours to permit completion of antenatal corticosteroids and transfer. (Strong)",
+      "reason": "Unverified manual enrichment from scripts/enrich-guidelines-lms.js lacking EHC chapter ID, source text hash, and verbatim source quote in LMS content.",
+      "status": "quarantined",
+      "quarantineDate": "2026-11-02T12:00:00Z"
+    }
+  ]
+}

@@ -1,84 +1,133 @@
 {
   "bookId": 771,
+  "id": "preterm-labor",
   "title": "Prevention And Management Of Preterm Labor",
   "url": "https://lms.ehc.gov.eg/lms/mod/book/view.php?id=771",
+  "sourceLastUpdated": "2026-09-28",
+  "contentHash": "1340c4360b8d2bc4624e7b02de46e950d633844c7803adf215758eca1002234c",
+  "parseStatus": "verified",
   "timestamp": "2026-10-08T12:04:23.247Z",
   "chaptersCount": 15,
   "phrasesCount": 612,
   "chapters": [
     {
       "chapterId": "5601",
-      "title": "Login to your account",
+      "title": "Recommendations",
+      "chapterUrl": "https://lms.ehc.gov.eg/lms/mod/book/view.php?id=771&chapterid=5601",
+      "isRecommendationChapter": true,
+      "isReferenceChapter": false,
       "phrasesCount": 202
     },
     {
       "chapterId": "5596",
-      "title": "Login to your account",
+      "title": "Executive Summary",
+      "chapterUrl": "https://lms.ehc.gov.eg/lms/mod/book/view.php?id=771&chapterid=5596",
+      "isRecommendationChapter": true,
+      "isReferenceChapter": false,
       "phrasesCount": 189
     },
     {
       "chapterId": "5593",
-      "title": "Login to your account",
+      "title": "Acknowledgements",
+      "chapterUrl": "https://lms.ehc.gov.eg/lms/mod/book/view.php?id=771&chapterid=5593",
+      "isRecommendationChapter": false,
+      "isReferenceChapter": true,
       "phrasesCount": 21
     },
     {
       "chapterId": "5594",
-      "title": "Login to your account",
+      "title": "Abbreviations",
+      "chapterUrl": "https://lms.ehc.gov.eg/lms/mod/book/view.php?id=771&chapterid=5594",
+      "isRecommendationChapter": false,
+      "isReferenceChapter": true,
       "phrasesCount": 15
     },
     {
       "chapterId": "5595",
-      "title": "Login to your account",
+      "title": "Glossary",
+      "chapterUrl": "https://lms.ehc.gov.eg/lms/mod/book/view.php?id=771&chapterid=5595",
+      "isRecommendationChapter": false,
+      "isReferenceChapter": false,
       "phrasesCount": 8
     },
     {
       "chapterId": "5597",
-      "title": "Login to your account",
+      "title": "Introduction",
+      "chapterUrl": "https://lms.ehc.gov.eg/lms/mod/book/view.php?id=771&chapterid=5597",
+      "isRecommendationChapter": false,
+      "isReferenceChapter": false,
       "phrasesCount": 24
     },
     {
       "chapterId": "5598",
-      "title": "Login to your account",
+      "title": "Scope and Purpose",
+      "chapterUrl": "https://lms.ehc.gov.eg/lms/mod/book/view.php?id=771&chapterid=5598",
+      "isRecommendationChapter": false,
+      "isReferenceChapter": false,
       "phrasesCount": 6
     },
     {
       "chapterId": "5599",
-      "title": "Login to your account",
+      "title": "Target Audience",
+      "chapterUrl": "https://lms.ehc.gov.eg/lms/mod/book/view.php?id=771&chapterid=5599",
+      "isRecommendationChapter": false,
+      "isReferenceChapter": false,
       "phrasesCount": 1
     },
     {
       "chapterId": "5600",
-      "title": "Login to your account",
+      "title": "Methodology",
+      "chapterUrl": "https://lms.ehc.gov.eg/lms/mod/book/view.php?id=771&chapterid=5600",
+      "isRecommendationChapter": false,
+      "isReferenceChapter": false,
       "phrasesCount": 51
     },
     {
       "chapterId": "5602",
-      "title": "Login to your account",
+      "title": "Research Needs",
+      "chapterUrl": "https://lms.ehc.gov.eg/lms/mod/book/view.php?id=771&chapterid=5602",
+      "isRecommendationChapter": false,
+      "isReferenceChapter": false,
       "phrasesCount": 6
     },
     {
       "chapterId": "5603",
-      "title": "Login to your account",
+      "title": "Implications For Practice",
+      "chapterUrl": "https://lms.ehc.gov.eg/lms/mod/book/view.php?id=771&chapterid=5603",
+      "isRecommendationChapter": false,
+      "isReferenceChapter": false,
       "phrasesCount": 3
     },
     {
       "chapterId": "5604",
-      "title": "Login to your account",
+      "title": "Clinical Quality Standards for Monitoring",
+      "chapterUrl": "https://lms.ehc.gov.eg/lms/mod/book/view.php?id=771&chapterid=5604",
+      "isRecommendationChapter": false,
+      "isReferenceChapter": false,
       "phrasesCount": 25
     },
     {
       "chapterId": "5605",
-      "title": "Login to your account",
+      "title": "Updating of the guideline",
+      "chapterUrl": "https://lms.ehc.gov.eg/lms/mod/book/view.php?id=771&chapterid=5605",
+      "isRecommendationChapter": false,
+      "isReferenceChapter": false,
       "phrasesCount": 2
     },
     {
       "chapterId": "5606",
-      "title": "Login to your account",
+      "title": "References",
+      "chapterUrl": "https://lms.ehc.gov.eg/lms/mod/book/view.php?id=771&chapterid=5606",
+      "isRecommendationChapter": false,
+      "isReferenceChapter": true,
       "phrasesCount": 58
     },
     {
       "chapterId": "5607",
-      "title": "Login to your account",
+      "title": "Disclaimer",
+      "chapterUrl": "https://lms.ehc.gov.eg/lms/mod/book/view.php?id=771&chapterid=5607",
+      "isRecommendationChapter": false,
+      "isReferenceChapter": true,
       "phrasesCount": 1
     }
   ],

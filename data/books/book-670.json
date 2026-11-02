@@ -1,74 +1,117 @@
 {
   "bookId": 670,
+  "id": "primary-cesarean-prevention",
   "title": "Recommendations on The Clinical Interventions For The Prevention of The Primary Cesarean Section",
   "url": "https://lms.ehc.gov.eg/lms/mod/book/view.php?id=670",
+  "sourceLastUpdated": "2026-07-21",
+  "contentHash": "a29e68da331d05505aaf577f242dd11a91ce80104c86eb93c15990bc8dadcdba",
+  "parseStatus": "verified",
   "timestamp": "2026-10-08T12:04:20.409Z",
   "chaptersCount": 13,
   "phrasesCount": 367,
   "chapters": [
     {
       "chapterId": "4363",
-      "title": "Login to your account",
+      "title": "Executive Summary",
+      "chapterUrl": "https://lms.ehc.gov.eg/lms/mod/book/view.php?id=670&chapterid=4363",
+      "isRecommendationChapter": true,
+      "isReferenceChapter": false,
       "phrasesCount": 85
     },
     {
       "chapterId": "4368",
-      "title": "Login to your account",
+      "title": "Recommendations",
+      "chapterUrl": "https://lms.ehc.gov.eg/lms/mod/book/view.php?id=670&chapterid=4368",
+      "isRecommendationChapter": true,
+      "isReferenceChapter": false,
       "phrasesCount": 96
     },
     {
       "chapterId": "4361",
-      "title": "Login to your account",
+      "title": "Acknowledgements",
+      "chapterUrl": "https://lms.ehc.gov.eg/lms/mod/book/view.php?id=670&chapterid=4361",
+      "isRecommendationChapter": false,
+      "isReferenceChapter": true,
       "phrasesCount": 19
     },
     {
       "chapterId": "4362",
-      "title": "Login to your account",
+      "title": "Abbreviations",
+      "chapterUrl": "https://lms.ehc.gov.eg/lms/mod/book/view.php?id=670&chapterid=4362",
+      "isRecommendationChapter": false,
+      "isReferenceChapter": true,
       "phrasesCount": 11
     },
     {
       "chapterId": "4364",
-      "title": "Login to your account",
+      "title": "Introduction",
+      "chapterUrl": "https://lms.ehc.gov.eg/lms/mod/book/view.php?id=670&chapterid=4364",
+      "isRecommendationChapter": false,
+      "isReferenceChapter": false,
       "phrasesCount": 11
     },
     {
       "chapterId": "4365",
-      "title": "Login to your account",
+      "title": "Scope and Purpose",
+      "chapterUrl": "https://lms.ehc.gov.eg/lms/mod/book/view.php?id=670&chapterid=4365",
+      "isRecommendationChapter": false,
+      "isReferenceChapter": false,
       "phrasesCount": 5
     },
     {
       "chapterId": "4366",
-      "title": "Login to your account",
+      "title": "Target Audience",
+      "chapterUrl": "https://lms.ehc.gov.eg/lms/mod/book/view.php?id=670&chapterid=4366",
+      "isRecommendationChapter": false,
+      "isReferenceChapter": false,
       "phrasesCount": 1
     },
     {
       "chapterId": "4367",
-      "title": "Login to your account",
+      "title": "Methodology",
+      "chapterUrl": "https://lms.ehc.gov.eg/lms/mod/book/view.php?id=670&chapterid=4367",
+      "isRecommendationChapter": false,
+      "isReferenceChapter": false,
       "phrasesCount": 51
     },
     {
       "chapterId": "4369",
-      "title": "Login to your account",
+      "title": "Research Needs",
+      "chapterUrl": "https://lms.ehc.gov.eg/lms/mod/book/view.php?id=670&chapterid=4369",
+      "isRecommendationChapter": false,
+      "isReferenceChapter": false,
       "phrasesCount": 2
     },
     {
       "chapterId": "4370",
-      "title": "Login to your account",
+      "title": "Implications For Practice",
+      "chapterUrl": "https://lms.ehc.gov.eg/lms/mod/book/view.php?id=670&chapterid=4370",
+      "isRecommendationChapter": false,
+      "isReferenceChapter": false,
       "phrasesCount": 2
     },
     {
       "chapterId": "4371",
-      "title": "Login to your account",
+      "title": "Clinical Quality Standards for Monitoring",
+      "chapterUrl": "https://lms.ehc.gov.eg/lms/mod/book/view.php?id=670&chapterid=4371",
+      "isRecommendationChapter": false,
+      "isReferenceChapter": false,
       "phrasesCount": 3
     },
     {
       "chapterId": "4372",
-      "title": "Login to your account",
+      "title": "References",
+      "chapterUrl": "https://lms.ehc.gov.eg/lms/mod/book/view.php?id=670&chapterid=4372",
+      "isRecommendationChapter": false,
+      "isReferenceChapter": true,
       "phrasesCount": 39
     },
     {
       "chapterId": "4373",
-      "title": "Login to your account",
+      "title": "Appendices",
+      "chapterUrl": "https://lms.ehc.gov.eg/lms/mod/book/view.php?id=670&chapterid=4373",
+      "isRecommendationChapter": false,
+      "isReferenceChapter": false,
       "phrasesCount": 42
     }
   ],

@@ -121,21 +121,21 @@ function search(query) {
 
 // Queries not explicitly in allTags
 const nonTagQueries = [
-  'shoulder dystocia',
-  'dinoprostone',
-  'salpingectomy',
-  'mcroberts',
-  'betamethasone',
-  'nifedipine',
-  'cornuostomy',
-  'hypotonic',
-  'anti-D',
-  'bimanual',
+  'fetal heart rate',
+  'active phase of labor',
+  'cervical ripening',
+  'epidural analgesia',
+  'bimanual uterine compression',
+  'blood pressure',
   'catamenial pneumothorax',
-  'robson',
-  'dystocia',
+  'thoracic endometriosis',
+  'respiratory distress',
+  'prophylactic oxytocin',
+  'betamethasone',
   'ketonuria',
-  'hypotonic intravenous fluids'
+  'robson',
+  'bimanual',
+  'retained cervix'
 ];
 
 console.log('--- Testing Non-Tag Clinical Queries ---');

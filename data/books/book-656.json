@@ -1,84 +1,133 @@
 {
   "bookId": 656,
+  "id": "pas",
   "title": "Placenta Accreta Spectrum (PAS): Diagnosis and Management",
   "url": "https://lms.ehc.gov.eg/lms/mod/book/view.php?id=656",
+  "sourceLastUpdated": "2026-07-21",
+  "contentHash": "dae51bd1b7ba366d416ca48fcc776e470711d08d1673eff2db3125f08e79f435",
+  "parseStatus": "verified",
   "timestamp": "2026-10-08T12:04:18.955Z",
   "chaptersCount": 15,
   "phrasesCount": 276,
   "chapters": [
     {
       "chapterId": "4195",
-      "title": "Login to your account",
+      "title": "Executive Summary",
+      "chapterUrl": "https://lms.ehc.gov.eg/lms/mod/book/view.php?id=656&chapterid=4195",
+      "isRecommendationChapter": true,
+      "isReferenceChapter": false,
       "phrasesCount": 1
     },
     {
       "chapterId": "4200",
-      "title": "Login to your account",
+      "title": "Recommendations",
+      "chapterUrl": "https://lms.ehc.gov.eg/lms/mod/book/view.php?id=656&chapterid=4200",
+      "isRecommendationChapter": true,
+      "isReferenceChapter": false,
       "phrasesCount": 1
     },
     {
       "chapterId": "4192",
-      "title": "Login to your account",
+      "title": "Acknowledgements",
+      "chapterUrl": "https://lms.ehc.gov.eg/lms/mod/book/view.php?id=656&chapterid=4192",
+      "isRecommendationChapter": false,
+      "isReferenceChapter": true,
       "phrasesCount": 24
     },
     {
       "chapterId": "4193",
-      "title": "Login to your account",
+      "title": "Abbreviations",
+      "chapterUrl": "https://lms.ehc.gov.eg/lms/mod/book/view.php?id=656&chapterid=4193",
+      "isRecommendationChapter": false,
+      "isReferenceChapter": true,
       "phrasesCount": 9
     },
     {
       "chapterId": "4194",
-      "title": "Login to your account",
+      "title": "Glossary",
+      "chapterUrl": "https://lms.ehc.gov.eg/lms/mod/book/view.php?id=656&chapterid=4194",
+      "isRecommendationChapter": false,
+      "isReferenceChapter": false,
       "phrasesCount": 12
     },
     {
       "chapterId": "4196",
-      "title": "Login to your account",
+      "title": "Introduction",
+      "chapterUrl": "https://lms.ehc.gov.eg/lms/mod/book/view.php?id=656&chapterid=4196",
+      "isRecommendationChapter": false,
+      "isReferenceChapter": false,
       "phrasesCount": 7
     },
     {
       "chapterId": "4197",
-      "title": "Login to your account",
+      "title": "Scope and Purpose",
+      "chapterUrl": "https://lms.ehc.gov.eg/lms/mod/book/view.php?id=656&chapterid=4197",
+      "isRecommendationChapter": false,
+      "isReferenceChapter": false,
       "phrasesCount": 5
     },
     {
       "chapterId": "4198",
-      "title": "Login to your account",
+      "title": "Target Audience",
+      "chapterUrl": "https://lms.ehc.gov.eg/lms/mod/book/view.php?id=656&chapterid=4198",
+      "isRecommendationChapter": false,
+      "isReferenceChapter": false,
       "phrasesCount": 3
     },
     {
       "chapterId": "4199",
-      "title": "Login to your account",
+      "title": "Methodology",
+      "chapterUrl": "https://lms.ehc.gov.eg/lms/mod/book/view.php?id=656&chapterid=4199",
+      "isRecommendationChapter": false,
+      "isReferenceChapter": false,
       "phrasesCount": 52
     },
     {
       "chapterId": "4206",
-      "title": "Login to your account",
+      "title": "Implementation considerations",
+      "chapterUrl": "https://lms.ehc.gov.eg/lms/mod/book/view.php?id=656&chapterid=4206",
+      "isRecommendationChapter": false,
+      "isReferenceChapter": false,
       "phrasesCount": 5
     },
     {
       "chapterId": "4201",
-      "title": "Login to your account",
+      "title": "Research needs",
+      "chapterUrl": "https://lms.ehc.gov.eg/lms/mod/book/view.php?id=656&chapterid=4201",
+      "isRecommendationChapter": false,
+      "isReferenceChapter": false,
       "phrasesCount": 4
     },
     {
       "chapterId": "4202",
-      "title": "Login to your account",
+      "title": "Clinical Quality Standards for Monitoring",
+      "chapterUrl": "https://lms.ehc.gov.eg/lms/mod/book/view.php?id=656&chapterid=4202",
+      "isRecommendationChapter": false,
+      "isReferenceChapter": false,
       "phrasesCount": 25
     },
     {
       "chapterId": "4203",
-      "title": "Login to your account",
+      "title": "Updating of the guidelines",
+      "chapterUrl": "https://lms.ehc.gov.eg/lms/mod/book/view.php?id=656&chapterid=4203",
+      "isRecommendationChapter": false,
+      "isReferenceChapter": false,
       "phrasesCount": 2
     },
     {
       "chapterId": "4204",
-      "title": "Login to your account",
+      "title": "Appendix I",
+      "chapterUrl": "https://lms.ehc.gov.eg/lms/mod/book/view.php?id=656&chapterid=4204",
+      "isRecommendationChapter": false,
+      "isReferenceChapter": false,
       "phrasesCount": 18
     },
     {
       "chapterId": "4205",
-      "title": "Login to your account",
+      "title": "References",
+      "chapterUrl": "https://lms.ehc.gov.eg/lms/mod/book/view.php?id=656&chapterid=4205",
+      "isRecommendationChapter": false,
+      "isReferenceChapter": true,
       "phrasesCount": 108
     }
   ],

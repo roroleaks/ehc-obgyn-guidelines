@@ -1,79 +1,125 @@
 {
   "bookId": 646,
+  "id": "robson-classification",
   "title": "Rationalizing the use of caesarean section in Egypt through implementing 10 group Classification system",
   "url": "https://lms.ehc.gov.eg/lms/mod/book/view.php?id=646",
+  "sourceLastUpdated": "2026-07-21",
+  "contentHash": "6768cf82520f4ea744847402b2654e6c1fc25e0cbaf3f048304ff6364bee2c1a",
+  "parseStatus": "verified",
   "timestamp": "2026-10-08T12:04:16.693Z",
   "chaptersCount": 14,
   "phrasesCount": 168,
   "chapters": [
     {
       "chapterId": "4061",
-      "title": "Login to your account",
+      "title": "Executive Summary and Objectives",
+      "chapterUrl": "https://lms.ehc.gov.eg/lms/mod/book/view.php?id=646&chapterid=4061",
+      "isRecommendationChapter": true,
+      "isReferenceChapter": false,
       "phrasesCount": 8
     },
     {
       "chapterId": "4062",
-      "title": "Login to your account",
+      "title": "Introduction",
+      "chapterUrl": "https://lms.ehc.gov.eg/lms/mod/book/view.php?id=646&chapterid=4062",
+      "isRecommendationChapter": false,
+      "isReferenceChapter": false,
       "phrasesCount": 2
     },
     {
       "chapterId": "4063",
-      "title": "Login to your account",
+      "title": "Caesarean section status in Egypt",
+      "chapterUrl": "https://lms.ehc.gov.eg/lms/mod/book/view.php?id=646&chapterid=4063",
+      "isRecommendationChapter": false,
+      "isReferenceChapter": false,
       "phrasesCount": 3
     },
     {
       "chapterId": "4064",
-      "title": "Login to your account",
+      "title": "Is there a standard accepted CS delivery rate?",
+      "chapterUrl": "https://lms.ehc.gov.eg/lms/mod/book/view.php?id=646&chapterid=4064",
+      "isRecommendationChapter": false,
+      "isReferenceChapter": false,
       "phrasesCount": 5
     },
     {
       "chapterId": "4065",
-      "title": "Login to your account",
+      "title": "How monitoring of CS rate can be achieved?",
+      "chapterUrl": "https://lms.ehc.gov.eg/lms/mod/book/view.php?id=646&chapterid=4065",
+      "isRecommendationChapter": false,
+      "isReferenceChapter": false,
       "phrasesCount": 4
     },
     {
       "chapterId": "4066",
-      "title": "Login to your account",
+      "title": "Indication of CS",
+      "chapterUrl": "https://lms.ehc.gov.eg/lms/mod/book/view.php?id=646&chapterid=4066",
+      "isRecommendationChapter": false,
+      "isReferenceChapter": false,
       "phrasesCount": 13
     },
     {
       "chapterId": "4067",
-      "title": "Login to your account",
+      "title": "Explanation of some indication",
+      "chapterUrl": "https://lms.ehc.gov.eg/lms/mod/book/view.php?id=646&chapterid=4067",
+      "isRecommendationChapter": false,
+      "isReferenceChapter": false,
       "phrasesCount": 13
     },
     {
       "chapterId": "4068",
-      "title": "Login to your account",
+      "title": "May cesarean section be regarded as an alternative to spontaneous delivery?",
+      "chapterUrl": "https://lms.ehc.gov.eg/lms/mod/book/view.php?id=646&chapterid=4068",
+      "isRecommendationChapter": false,
+      "isReferenceChapter": false,
       "phrasesCount": 14
     },
     {
       "chapterId": "4069",
-      "title": "Login to your account",
+      "title": "CS classification systems and Robson Classification",
+      "chapterUrl": "https://lms.ehc.gov.eg/lms/mod/book/view.php?id=646&chapterid=4069",
+      "isRecommendationChapter": false,
+      "isReferenceChapter": false,
       "phrasesCount": 13
     },
     {
       "chapterId": "4070",
-      "title": "Login to your account",
+      "title": "What are the variables of Robson Classification?",
+      "chapterUrl": "https://lms.ehc.gov.eg/lms/mod/book/view.php?id=646&chapterid=4070",
+      "isRecommendationChapter": false,
+      "isReferenceChapter": false,
       "phrasesCount": 15
     },
     {
       "chapterId": "4071",
-      "title": "Login to your account",
+      "title": "General considerations and definitions in using Robson Classification System",
+      "chapterUrl": "https://lms.ehc.gov.eg/lms/mod/book/view.php?id=646&chapterid=4071",
+      "isRecommendationChapter": false,
+      "isReferenceChapter": false,
       "phrasesCount": 14
     },
     {
       "chapterId": "4072",
-      "title": "Login to your account",
+      "title": "How to classify women in Robson classification?",
+      "chapterUrl": "https://lms.ehc.gov.eg/lms/mod/book/view.php?id=646&chapterid=4072",
+      "isRecommendationChapter": false,
+      "isReferenceChapter": false,
       "phrasesCount": 44
     },
     {
       "chapterId": "4073",
-      "title": "Login to your account",
+      "title": "The Robson Classification Report Table",
+      "chapterUrl": "https://lms.ehc.gov.eg/lms/mod/book/view.php?id=646&chapterid=4073",
+      "isRecommendationChapter": false,
+      "isReferenceChapter": false,
       "phrasesCount": 10
     },
     {
       "chapterId": "4074",
-      "title": "Login to your account",
+      "title": "References",
+      "chapterUrl": "https://lms.ehc.gov.eg/lms/mod/book/view.php?id=646&chapterid=4074",
+      "isRecommendationChapter": false,
+      "isReferenceChapter": true,
       "phrasesCount": 10
     }
   ],

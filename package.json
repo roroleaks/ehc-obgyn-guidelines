@@ -7,11 +7,12 @@
     "dev": "npx serve . -p 3000",
     "start": "npx serve . -p 3000",
     "deploy": "vercel --prod",
-    "test": "node --check app.js && node tests/run-all.js",
+    "test": "node --check app.js && node scripts/validate-data.js && node tests/run-all.js",
     "test:syntax": "node --check app.js",
     "test:harnesses": "node tests/run-all.js",
     "snapshot": "node scripts/snapshot-guidelines.js",
-    "snapshot:apply": "node scripts/snapshot-guidelines.js --apply"
+    "snapshot:apply": "node scripts/snapshot-guidelines.js --apply",
+    "validate:data": "node scripts/validate-data.js"
   },
   "keywords": [
     "ehc",

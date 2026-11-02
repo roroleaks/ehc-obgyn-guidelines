@@ -26,7 +26,9 @@
     iud: 'intrauterine device', iugr: 'intrauterine growth restriction', fgr: 'fetal growth restriction',
     ivg: 'intravenous glucose', im: 'intramuscular',
     iu: 'international units', mcg: 'micrograms', hctz: 'hydrochlorothiazide',
-    dilation: 'dilatation', dilatation: 'dilation'
+    dilation: 'dilatation', dilatation: 'dilation',
+    ecv: 'external cephalic version', pul: 'pregnancy of unknown location',
+    pprom: 'preterm prelabor rupture of membranes', meows: 'modified early obstetric warning'
   });
 
   var searchInput = document.getElementById('search-input');
@@ -380,7 +382,20 @@
   }
 
   function normalizeForMatch(str) {
-    return String(str).toLowerCase().replace(/ae/g, 'e').replace(/oe/g, 'e');
+    return String(str)
+      .toLowerCase()
+      .replace(/&beta;/gi, 'beta')
+      .replace(/[β]/g, 'beta')
+      .replace(/[α]/g, 'alpha')
+      .replace(/[γ]/g, 'gamma')
+      .replace(/[δ]/g, 'delta')
+      .replace(/[\u2013\u2014]/g, '-')
+      .replace(/[≤]/g, '<=')
+      .replace(/[≥]/g, '>=')
+      .replace(/[±]/g, '+/-')
+      .replace(/[×]/g, 'x')
+      .replace(/ae/g, 'e')
+      .replace(/oe/g, 'e');
   }
 
   var _variantSet = null;
@@ -1098,24 +1113,37 @@
       })
       .then(function(html) {
         var doc = new DOMParser().parseFromString(html, 'text/html');
-        var links = doc.querySelectorAll('a[href*="mod/book/view.php?id="], a[href*="mod/resource/view.php?id="], a[href*="mod/page/view.php?id="]');
+        // Restrict guideline module selection strictly to the course activity container
+        var container = doc.querySelector('.course-content, #region-main, [role="main"], .topics');
+        var root = container || doc.body;
+        var links = root.querySelectorAll('a[href*="mod/book/view.php?id="]');
         var books = {};
         var order = [];
+        var rejected = [];
         Array.prototype.forEach.call(links, function(a) {
+          // Reject any anchor located inside footer, nav, or header scaffolding
+          if (a.closest && a.closest('footer, .footer, .footer_company_widget, nav, header')) {
+            rejected.push({ href: a.getAttribute('href'), title: (a.textContent || '').trim(), reason: 'footer_scaffolding' });
+            return;
+          }
           var href = a.getAttribute('href');
           if (!href) return;
-          var m = href.match(/mod\/(?:book|resource|page)\/view\.php\?id=(\d+)/);
+          var m = href.match(/mod\/book\/view\.php\?id=(\d+)/);
           if (!m) return;
           var id = m[1];
           if (books[id]) return;
           var rawTitle = (a.textContent || '').replace(/\s+/g, ' ').trim();
-          books[id] = { bookId: parseInt(id, 10), title: rawTitle.replace(/\s+(?:Book|File|Page)\s*$/i, ''), href: href };
+          books[id] = { bookId: parseInt(id, 10), title: rawTitle.replace(/\s+(?:Book|File|Page)\s*$/i, '').trim(), href: href };
           order.push(id);
         });
 
-        // Only a response with real guideline links counts as a successful sync.
-        // A blank, blocked, or unparsed response must fall straight into the
-        // cached-data path below and must never be reported as "up to date".
+        // Record any non-guideline module links (mod/page or mod/resource) as rejected
+        var nonBookLinks = doc.querySelectorAll('a[href*="mod/page/view.php?id="], a[href*="mod/resource/view.php?id="]');
+        Array.prototype.forEach.call(nonBookLinks, function(a) {
+          rejected.push({ href: a.getAttribute('href'), title: (a.textContent || '').trim(), reason: 'non_book_module' });
+        });
+
+        // Only a response with verified guideline book links counts as a valid inventory.
         if (!order.length) throw new Error('empty');
 
         saveLastSync();

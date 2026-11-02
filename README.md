@@ -17,6 +17,26 @@ A fast, mobile-friendly search app for the **Egyptian Health Council (EHC) Obste
 - **Mobile optimized** — safe-area insets, large tap targets, `viewport-fit=cover`, PWA metadata, and a layout that works from phones to desktops.
 - **Dark mode** — automatically adapts to the system color scheme.
 
+## Clinical Reference Aid & Currency Policy
+
+> [!IMPORTANT]
+> **Clinical Disclaimer:** This application is a clinical reference aid designed to assist healthcare professionals in navigating official EHC guidelines. It does not replace independent clinical judgement, institutional protocols, or individual patient assessment.
+
+### Provenance & Data Currency Architecture
+The application maintains strict separation between verified local snapshot data and live LMS synchronization states:
+- **Local Snapshot Date:** Every guideline phrase is bound to a verified local snapshot date (`Nov 2, 2026`) and mapped to its exact EHC book, chapter, and SHA-256 content hash in `data/phrase-provenance.json`.
+- **Last Successful Validated Sync:** A live sync timestamp is only stored after full verification of the 11 guideline books. Failed, partial, or contaminated syncs never overwrite local verified data.
+- **LMS Sync Unavailable (Cached Fallback):** If the EHC LMS is unreachable or returns an error, the UI displays: `Source: Egyptian Health Council (EHC) · Guideline data current as of Nov 2, 2026 · LMS sync unavailable — using cached data`.
+- **Sync Pending:** While checking the LMS, status reads `LMS sync pending` without making false "up to date" claims.
+- **Strict Module Filtering:** Only `mod/book/view.php?id=\d+` activities inside the course content region are accepted. Footer links (`mod/page` such as `Council activities`, `About council`, `Board of Trustees`, and `mod/resource` PDFs) are strictly rejected.
+
+### Deterministic Data Validation
+To verify 100% provenance integrity, inventory compliance, and zero login leaks:
+
+```bash
+npm run validate:data
+```
+
 ## Getting Started
 
 ### Run locally

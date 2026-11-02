@@ -1,0 +1,125 @@
+{
+  "source": "Egyptian Health Council (EHC)",
+  "courseTitle": "Obstetric and Gynecology Guidelines",
+  "courseId": 38,
+  "courseUrl": "https://lms.ehc.gov.eg/lms/course/view.php?id=38",
+  "sectionId": 186,
+  "sectionUrl": "https://lms.ehc.gov.eg/lms/course/section.php?id=186",
+  "sectionTitle": "Obstetric and Gynecology Guidelines",
+  "auditDate": "2026-11-02",
+  "expectedBookCount": 11,
+  "allowedModuleTypes": ["mod_book"],
+  "rejectedModuleTypes": ["mod_page", "mod_resource", "mod_url", "mod_folder"],
+  "books": [
+    {
+      "bookId": 252,
+      "id": "non-clinical-cs",
+      "title": "Non-Clinical Interventions to reduce overall cesarean sections",
+      "bookUrl": "https://lms.ehc.gov.eg/lms/mod/book/view.php?id=252",
+      "sourceLastUpdated": "2026-07-21",
+      "chapterCount": 10,
+      "recommendationChapterId": 851,
+      "summaryChapterId": 850
+    },
+    {
+      "bookId": 646,
+      "id": "robson-classification",
+      "title": "Rationalizing the use of caesarean section in Egypt through implementing 10 group Classification system",
+      "bookUrl": "https://lms.ehc.gov.eg/lms/mod/book/view.php?id=646",
+      "sourceLastUpdated": "2026-07-21",
+      "chapterCount": 14,
+      "recommendationChapterId": 4066,
+      "summaryChapterId": 4061
+    },
+    {
+      "bookId": 652,
+      "id": "ectopic-pregnancy",
+      "title": "The diagnosis and management of ectopic pregnancy & pregnancy of unknown location",
+      "bookUrl": "https://lms.ehc.gov.eg/lms/mod/book/view.php?id=652",
+      "sourceLastUpdated": "2026-07-21",
+      "chapterCount": 12,
+      "recommendationChapterId": 4144,
+      "summaryChapterId": 4138
+    },
+    {
+      "bookId": 653,
+      "id": "hypertension-pregnancy",
+      "title": "Prevention and Treatment of Hypertension in Pregnancy",
+      "bookUrl": "https://lms.ehc.gov.eg/lms/mod/book/view.php?id=653",
+      "sourceLastUpdated": "2026-07-21",
+      "chapterCount": 13,
+      "recommendationChapterId": 4156,
+      "summaryChapterId": 4151
+    },
+    {
+      "bookId": 656,
+      "id": "pas",
+      "title": "Placenta Accreta Spectrum (PAS): Diagnosis and Management",
+      "bookUrl": "https://lms.ehc.gov.eg/lms/mod/book/view.php?id=656",
+      "sourceLastUpdated": "2026-07-21",
+      "chapterCount": 15,
+      "recommendationChapterId": 4200,
+      "summaryChapterId": 4195
+    },
+    {
+      "bookId": 665,
+      "id": "endometriosis",
+      "title": "The diagnosis and management of endometriosis",
+      "bookUrl": "https://lms.ehc.gov.eg/lms/mod/book/view.php?id=665",
+      "sourceLastUpdated": "2026-07-21",
+      "chapterCount": 14,
+      "recommendationChapterId": 4317,
+      "summaryChapterId": 4312
+    },
+    {
+      "bookId": 670,
+      "id": "primary-cesarean-prevention",
+      "title": "Recommendations on The Clinical Interventions For The Prevention of The Primary Cesarean Section",
+      "bookUrl": "https://lms.ehc.gov.eg/lms/mod/book/view.php?id=670",
+      "sourceLastUpdated": "2026-07-21",
+      "chapterCount": 13,
+      "recommendationChapterId": 4368,
+      "summaryChapterId": 4363
+    },
+    {
+      "bookId": 713,
+      "id": "pph",
+      "title": "Primary Postpartum Hemorrhage",
+      "bookUrl": "https://lms.ehc.gov.eg/lms/mod/book/view.php?id=713",
+      "sourceLastUpdated": "2026-07-21",
+      "chapterCount": 14,
+      "recommendationChapterId": 4854,
+      "summaryChapterId": 4849
+    },
+    {
+      "bookId": 716,
+      "id": "nausea-vomiting",
+      "title": "The management of nausea and vomiting during pregnancy",
+      "bookUrl": "https://lms.ehc.gov.eg/lms/mod/book/view.php?id=716",
+      "sourceLastUpdated": "2026-07-21",
+      "chapterCount": 12,
+      "recommendationChapterId": 4895,
+      "summaryChapterId": 4890
+    },
+    {
+      "bookId": 744,
+      "id": "normal-labor",
+      "title": "Normal Labor",
+      "bookUrl": "https://lms.ehc.gov.eg/lms/mod/book/view.php?id=744",
+      "sourceLastUpdated": "2026-07-21",
+      "chapterCount": 14,
+      "recommendationChapterId": 5251,
+      "summaryChapterId": 5246
+    },
+    {
+      "bookId": 771,
+      "id": "preterm-labor",
+      "title": "Prevention And Management Of Preterm Labor",
+      "bookUrl": "https://lms.ehc.gov.eg/lms/mod/book/view.php?id=771",
+      "sourceLastUpdated": "2026-09-28",
+      "chapterCount": 15,
+      "recommendationChapterId": 5601,
+      "summaryChapterId": 5596
+    }
+  ]
+}
