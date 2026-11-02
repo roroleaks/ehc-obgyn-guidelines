@@ -30,6 +30,8 @@ const CASE_1_QUERIES = [
   { query: 'thoracic endometriosis', type: 'multi-word expression' },
   { query: 'prophylactic oxytocin', type: 'multi-word expression' },
   { query: 'respiratory distress', type: 'multi-word expression' },
+  // Unicode clinical expression
+  { query: 'β-hCG', type: 'Unicode clinical expression' },
   // Single medical words (all strictly not in allTags)
   { query: 'betamethasone', type: 'single word' },
   { query: 'ketonuria', type: 'single word' },

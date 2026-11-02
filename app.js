@@ -754,45 +754,83 @@
   function highlightText(text, query) {
     var escaped = escapeHtml(text);
     if (!query) return escaped;
-    var rawWords = query.toLowerCase().split(/\s+/).filter(Boolean);
-    if (!rawWords.length) return escaped;
+
+    var q = String(query).trim();
+    if (!q) return escaped;
 
     var patterns = [];
     function pushPattern(p) {
       if (p && patterns.indexOf(p) === -1) patterns.push(p);
     }
 
-    // If query is a multi-word expression, build contiguous expression patterns FIRST
-    // so the entire medical expression highlights as a cohesive block:
+    // 1. Unicode-aware tokenization: extract words & component tokens using \p{L}\p{N}
+    var rawWords = q.toLowerCase().split(/\s+/).filter(Boolean);
+    var unicodeTokens = q.toLowerCase().split(/[^\p{L}\p{N}]+/u).filter(Boolean);
+    if (!rawWords.length && !unicodeTokens.length) return escaped;
+
+    // Greek letter equivalence map
+    var GREEK_MAP = { 'β': 'beta', 'beta': 'β', 'α': 'alpha', 'alpha': 'α' };
+
+    function tokenPattern(t) {
+      var alt = GREEK_MAP[t];
+      if (alt) {
+        return '(?:' + escapeRegex(t) + '|' + escapeRegex(alt) + ')';
+      }
+      return escapeRegex(t);
+    }
+
+    // 2. Compound expressions from Unicode tokens (e.g., β-hCG, low-molecular-weight)
+    if (unicodeTokens.length > 1) {
+      var compoundParts = unicodeTokens.map(tokenPattern);
+      pushPattern(compoundParts.join('[\\s\\-]+'));
+    }
+
+    // 3. Multi-word expression patterns from whitespace-separated words
     if (rawWords.length > 1) {
       var formLists = rawWords.map(wordForms);
       if (rawWords.length === 2) {
         formLists[0].forEach(function(w1) {
           formLists[1].forEach(function(w2) {
-            pushPattern(escapeRegex(w1) + '[\\s\\-]+' + escapeRegex(w2));
+            pushPattern(tokenPattern(w1) + '[\\s\\-]+' + tokenPattern(w2));
           });
         });
       } else {
-        pushPattern(escapeRegex(query.trim()));
+        pushPattern(escapeRegex(q));
       }
     }
 
-    // Then add individual words / variants for remaining occurrences
-    rawWords.forEach(function(w) {
-      pushPattern(escapeRegex(w));
-      var variants = variantifyQuery(w);
+    // 4. Component tokens & spelling variants
+    unicodeTokens.forEach(function(tok) {
+      if (GREEK_MAP[tok]) {
+        pushPattern(tokenPattern(tok));
+      } else if (tok.length >= 2 || unicodeTokens.length === 1) {
+        pushPattern(escapeRegex(tok));
+      }
+      var variants = variantifyQuery(tok);
       variants.forEach(function(v) {
         if (v && v.length >= 3) pushPattern(escapeRegex(v));
       });
-      if (w.indexOf('ae') !== -1) {
-        pushPattern(escapeRegex(w.replace(/ae/g, 'e')));
-      } else if (w.indexOf('e') !== -1) {
-        pushPattern(escapeRegex(w.replace('e', 'ae')));
+      if (tok.indexOf('ae') !== -1) {
+        pushPattern(escapeRegex(tok.replace(/ae/g, 'e')));
+      } else if (tok.indexOf('e') !== -1) {
+        pushPattern(escapeRegex(tok.replace('e', 'ae')));
+      }
+    });
+
+    rawWords.forEach(function(w) {
+      if (w.length >= 2) {
+        pushPattern(escapeRegex(w));
+        var variants = variantifyQuery(w);
+        variants.forEach(function(v) {
+          if (v && v.length >= 3) pushPattern(escapeRegex(v));
+        });
       }
     });
 
     // Sort patterns by length descending so longer contiguous expressions match before single words
     patterns.sort(function(a, b) { return b.length - a.length; });
+
+    if (!patterns.length) return escaped;
 
     var regex = new RegExp('(' + patterns.join('|') + ')', 'gi');
     return escaped.replace(regex, '<mark>$1</mark>');
