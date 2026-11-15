@@ -226,13 +226,62 @@
   }
 
   function renderTags() {
-    tagsContainer.innerHTML = allTags.map(function(tag, i) {
-      return '<button type="button" class="tag-btn" data-tag="' + escapeHtml(tag) +
-        '" aria-pressed="false" tabindex="' + (i === 0 ? '0' : '-1') + '">' + escapeHtml(tag) + '</button>';
-    }).join('');
+    // Group allTags alphabetically by first character
+    var groups = {};
+    var letters = [];
+    allTags.forEach(function(tag) {
+      var firstChar = tag.trim().charAt(0).toUpperCase();
+      var key = /[A-Z]/.test(firstChar) ? firstChar : '#';
+      if (!groups[key]) {
+        groups[key] = [];
+        letters.push(key);
+      }
+      groups[key].push(tag);
+    });
+    letters.sort(function(a, b) { return a.localeCompare(b); });
 
+    var html = '';
+
+    // Alphabet Quick Nav bar with Expand/Collapse All
+    html += '<div class="tags-alphabet-nav" role="toolbar" aria-label="Alphabetical tag letter index">';
+    html += '<span class="tags-nav-label">Jump to:</span>';
+    letters.forEach(function(letter) {
+      html += '<button type="button" class="alpha-nav-btn" data-target-letter="' + escapeHtml(letter) + '" aria-label="Jump to letter ' + escapeHtml(letter) + '">' + escapeHtml(letter) + '</button>';
+    });
+    html += '<div class="tags-nav-actions">';
+    html += '<button type="button" class="tags-action-btn" id="tags-expand-all">Expand all</button>';
+    html += '<button type="button" class="tags-action-btn" id="tags-collapse-all">Collapse all</button>';
+    html += '</div>';
+    html += '</div>';
+
+    // Letter Drop Menus (<details class="tag-letter-group">)
+    var globalIdx = 0;
+    letters.forEach(function(letter, lIdx) {
+      var tagsInLetter = groups[letter];
+      var isOpen = (lIdx === 0 || letter === 'A');
+      html += '<details class="tag-letter-group" data-letter="' + escapeHtml(letter) + '"' + (isOpen ? ' open' : '') + '>';
+      html += '<summary class="tag-letter-summary" aria-label="Letter ' + escapeHtml(letter) + ', ' + tagsInLetter.length + (tagsInLetter.length === 1 ? ' word' : ' words') + '">';
+      html += '<div class="tag-letter-left">';
+      html += '<span class="tag-letter-badge">' + escapeHtml(letter) + '</span>';
+      html += '<span class="tag-letter-title">Letter ' + escapeHtml(letter) + '</span>';
+      html += '<span class="tag-letter-count">' + tagsInLetter.length + ' ' + (tagsInLetter.length === 1 ? 'word' : 'words') + '</span>';
+      html += '</div>';
+      html += '<span class="tag-letter-chevron" aria-hidden="true"></span>';
+      html += '</summary>';
+      html += '<div class="tag-letter-words">';
+      tagsInLetter.forEach(function(tag) {
+        html += '<button type="button" class="tag-btn" data-tag="' + escapeHtml(tag) +
+          '" aria-pressed="false" tabindex="' + (globalIdx === 0 ? '0' : '-1') + '">' + escapeHtml(tag) + '</button>';
+        globalIdx++;
+      });
+      html += '</div>';
+      html += '</details>';
+    });
+
+    tagsContainer.innerHTML = html;
+
+    // Attach listeners to tag buttons
     var tbs = tagsContainer.querySelectorAll('.tag-btn');
-
     Array.prototype.forEach.call(tbs, function(btn) {
       btn.addEventListener('click', function() { handleTagClick(btn); });
       btn.addEventListener('keydown', function(e) {
@@ -251,6 +300,42 @@
       tbs[0].tabIndex = 0;
     }
 
+    // Attach listeners to Alphabet Quick Nav buttons
+    Array.prototype.forEach.call(tagsContainer.querySelectorAll('.alpha-nav-btn'), function(navBtn) {
+      navBtn.addEventListener('click', function() {
+        var letter = navBtn.getAttribute('data-target-letter');
+        var group = tagsContainer.querySelector('.tag-letter-group[data-letter="' + letter + '"]');
+        if (group) {
+          group.open = true;
+          group.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          var firstTag = group.querySelector('.tag-btn');
+          if (firstTag) {
+            Array.prototype.forEach.call(tbs, function(b) { b.tabIndex = -1; });
+            firstTag.tabIndex = 0;
+            firstTag.focus();
+          }
+        }
+      });
+    });
+
+    // Expand all / Collapse all listeners
+    var expandAllBtn = document.getElementById('tags-expand-all');
+    var collapseAllBtn = document.getElementById('tags-collapse-all');
+    if (expandAllBtn) {
+      expandAllBtn.addEventListener('click', function() {
+        Array.prototype.forEach.call(tagsContainer.querySelectorAll('.tag-letter-group'), function(g) {
+          g.open = true;
+        });
+      });
+    }
+    if (collapseAllBtn) {
+      collapseAllBtn.addEventListener('click', function() {
+        Array.prototype.forEach.call(tagsContainer.querySelectorAll('.tag-letter-group'), function(g) {
+          g.open = false;
+        });
+      });
+    }
+
     syncTagsToggle();
   }
 
@@ -263,6 +348,10 @@
     else {
       var idx = Array.prototype.indexOf.call(tbs, current);
       target = tbs[(idx + dir + tbs.length) % tbs.length];
+    }
+    var parentDetails = target.closest('details');
+    if (parentDetails && !parentDetails.open) {
+      parentDetails.open = true;
     }
     Array.prototype.forEach.call(tbs, function(b) { b.tabIndex = -1; });
     target.tabIndex = 0;
