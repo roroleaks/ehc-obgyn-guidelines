@@ -120,7 +120,14 @@ server.listen(PORT, async () => {
       }
 
       await send('Page.navigate', { url: `http://127.0.0.1:${PORT}/index.html` });
-      await new Promise(r => setTimeout(r, 1200));
+      const pollStart = Date.now();
+      while (Date.now() - pollStart < 15000) {
+        const evalRes = await send('Runtime.evaluate', {
+          expression: `!!(document.querySelector('#tags-container .tag-btn'))`
+        });
+        if (evalRes && evalRes.result && evalRes.result.value) break;
+        await new Promise(r => setTimeout(r, 60));
+      }
 
       const code = `(function(){
         const input = document.getElementById('search-input');
@@ -128,7 +135,15 @@ server.listen(PORT, async () => {
         input.dispatchEvent(new Event('input', { bubbles: true }));
       })()`;
       await send('Runtime.evaluate', { expression: code });
-      await new Promise(r => setTimeout(r, 600));
+
+      const searchStart = Date.now();
+      while (Date.now() - searchStart < 5000) {
+        const hasCardOrNoRes = await send('Runtime.evaluate', {
+          expression: `document.querySelectorAll('.result-card').length > 0 || (document.getElementById('no-results') && !document.getElementById('no-results').hidden)`
+        });
+        if (hasCardOrNoRes && hasCardOrNoRes.result && hasCardOrNoRes.result.value) break;
+        await new Promise(r => setTimeout(r, 50));
+      }
 
       const checkCode = `(function(){
         const cards = document.querySelectorAll('.result-card');
